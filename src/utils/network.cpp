@@ -15,7 +15,7 @@ namespace
 
 namespace dawn::utils
 {
-    std::string Network::fetch_recipe(const std::string& package_name)
+    std::string Network::fetch_recipe(const std::string& package_name, const std::string& script_name)
     {
         CURL* curl = curl_easy_init();
         if (!curl)
@@ -24,7 +24,8 @@ namespace dawn::utils
         }
 
         std::string read_buffer;
-        std::string url = "https://raw.githubusercontent.com/DawnPackageSystem/halo/main/recipes/" + package_name + "/install.sh";
+        std::string url = "https://raw.githubusercontent.com/DawnPackageSystem/halo/main/recipes/" 
+                          + package_name + "/" + script_name;
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);

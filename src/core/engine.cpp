@@ -21,7 +21,7 @@ namespace dawn::core
     {
         ensure_root();
         
-        std::string script_content = dawn::utils::Network::fetch_recipe(package_name);
+        std::string script_content = dawn::utils::Network::fetch_recipe(package_name, "install.sh");
         std::filesystem::path staging_dir = "/tmp/dawn_staging";
         std::filesystem::create_directories(staging_dir);
         std::filesystem::path script_path = staging_dir / (package_name + "_install.sh");
@@ -54,22 +54,70 @@ namespace dawn::core
     void Engine::remove_package(const std::string& package_name)
     {
         ensure_root();
-        std::string command = "apt-get remove -y " + package_name;
-        int status = std::system(command.c_str());
-        if (status != 0)
+        
+        std::string script_content;
+        bool has_remote_recipe = true;
+
+        try
         {
-            throw std::runtime_error("Error: Natively initiated package removal sequence failed.");
+            script_content = dawn::utils::Network::fetch_recipe(package_name, "remove.sh");
+        }
+        catch (...)
+        {
+            has_remote_recipe = false;
+        }
+
+        // HALO'da özel bir remove.sh tanımlıysa onu çalıştır
+        if (has_remote_recipe)
+        {
+            std::filesystem::path staging_dir = "/tmp/dawn_staging";
+            std::filesystem::create_directories(staging_dir);
+            std::filesystem::path script_path = staging_dir / (package_name + "_remove.sh");
+
+            std::ofstream out_file(script_path);
+            if (!out_file.is_open())
+            {
+                throw std::runtime_error("Error: Storage engine context generation failed.");
+            }
+
+            out_file << script_content;
+            out_file.close();
+
+            std::filesystem::permissions(script_path, 
+                std::filesystem::perms::owner_all | 
+                std::filesystem::perms::group_read | 
+                std::filesystem::perms::others_read);
+
+            std::string command = script_path.string();
+            int status = std::system(command.c_str());
+
+            std::filesystem::remove(script_path);
+
+            if (status != 0)
+            {
+                throw std::runtime_error("Error: Removal directive execution sequence returned an anomalous state.");
+            }
+        }
+        else
+        {
+            // HALO'da özel remove.sh yoksa /usr/local/bin altındaki binary'yi temizle
+            std::filesystem::path target_binary = std::filesystem::path("/usr/local/bin") / package_name;
+            if (std::filesystem::exists(target_binary))
+            {
+                std::filesystem::remove(target_binary);
+                std::cout << "Purged binary asset: " << target_binary.string() << "\n";
+            }
+            else
+            {
+                throw std::runtime_error("Error: No removal recipe found and target binary does not exist in /usr/local/bin.");
+            }
         }
     }
 
     void Engine::update_system()
     {
         ensure_root();
-        int status = std::system("apt-get update");
-        if (status != 0)
-        {
-            throw std::runtime_error("Error: Native repository synchronization pipeline failed.");
-        }
+        std::cout << "Synchronizing HALO recipe manifest cache...\n";
     }
 
     void Engine::list_recipes()
@@ -77,12 +125,12 @@ namespace dawn::core
         std::cout << "Synchronizing remote registry manifests...\n";
         try
         {
-            std::string catalog = dawn::utils::Network::fetch_recipe("../catalog.list");
+            std::string catalog = dawn::utils::Network::fetch_recipe("../catalog.list", "catalog.list");
             std::cout << catalog << "\n";
         }
         catch (...)
         {
-            std::cout << "firefox\ngoogle-chrome\nvs-code\n";
+            std::cout << "neofetch\nfirefox\ngoogle-chrome\nvs-code\n";
         }
     }
 
