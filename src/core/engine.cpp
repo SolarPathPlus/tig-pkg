@@ -21,7 +21,7 @@ namespace dawn::core
     {
         ensure_root();
         
-        std::string script_content = dawn::utils::Network::fetch_recipe(package_name, "install.sh");
+        std::string script_content = hypecc:utils::Network::fetch_recipe(package_name, "install.sh");
         std::filesystem::path staging_dir = "/tmp/dawn_staging";
         std::filesystem::create_directories(staging_dir);
         std::filesystem::path script_path = staging_dir / (package_name + "_install.sh");
@@ -60,7 +60,7 @@ namespace dawn::core
 
         try
         {
-            script_content = dawn::utils::Network::fetch_recipe(package_name, "remove.sh");
+            script_content = hypecc:utils::Network::fetch_recipe(package_name, "remove.sh");
         }
         catch (...)
         {
@@ -125,7 +125,7 @@ namespace dawn::core
         std::cout << "Synchronizing remote registry manifests...\n";
         try
         {
-            std::string catalog = dawn::utils::Network::fetch_recipe("../catalog.list", "catalog.list");
+            std::string catalog = hypecc:utils::Network::fetch_recipe("../catalog.list", "catalog.list");
             std::cout << catalog << "\n";
         }
         catch (...)
