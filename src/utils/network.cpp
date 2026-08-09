@@ -13,7 +13,7 @@ namespace
     }
 }
 
-namespace dawn::utils
+namespace hypecc::utils
 {
     std::string Network::fetch_recipe(const std::string& package_name, const std::string& script_name)
     {
