@@ -11,7 +11,7 @@ CXX="${CXX:-g++}"
 CXXFLAGS="-std=c++20 -O3 -march=native -Wall -Wextra"
 LDFLAGS="-lcurl"
 
-echo "Derleniyor: $SOURCE -> $OUTPUT"
+echo "Compiling: $SOURCE -> $OUTPUT"
 
 if $CXX $CXXFLAGS "$SOURCE" -o "$OUTPUT" $LDFLAGS; then
     echo "Compilation successful: $OUTPUT"
