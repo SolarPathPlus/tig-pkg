@@ -25,7 +25,7 @@ void print_help()
               << "  search       - Search through HALO recipe names and descriptions\n"
               << "  show         - Display detailed information about a specific recipe\n"
               << "  install      - Fetch a recipe from HALO and execute custom install logic\n"
-              << "  remove       - Remove a package natively via APT\n"
+              << "  remove       - Remove a package natively\n"
               << "  update       - Sync local package lists and HALO recipe cache\n\n"
               << "Options:\n"
               << "  -v, --version   - Display version manager information\n"
