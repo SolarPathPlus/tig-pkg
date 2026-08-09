@@ -30,7 +30,7 @@ void print_help()
               << "  update       - Sync local package lists and Signature recipe cache\n\n"
               << "Options:\n"
               << "  -v, --version   - Display version manager information\n"
-              << "  -h, --help      - Display this help menu\n";
+              << "  -h, --help      - Display the help menu\n";
 }
 
 int main(int argc, char* argv[])
