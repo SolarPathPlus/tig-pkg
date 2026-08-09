@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace dawn::core
+namespace hypecc::core
 {
     class Engine
     {
