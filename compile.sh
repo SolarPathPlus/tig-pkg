@@ -2,7 +2,7 @@
 
 set -e
 
-OUTPUT="dawn"
+OUTPUT="hypecc"
 
 SOURCES=(
     "src/main.cpp"
