@@ -11,8 +11,8 @@ void print_version()
 /_______  (____  /\/\_/|___|  /
         \/     \/           \/ )" 
               << "\n\n";
-    std::cout << "Dawn Package Hunter — Version 1.2.1-LTS\n";
-    std::cout << "Engine: Modern C++ (Bare-Metal Execution Layer)\n";
+    std::cout << "Dawn Package System — Version 1.2.2-LTS\n";
+    std::cout << "Engine: Modern C++ 20 (Bare-Metal Execution Layer)\n";
     std::cout << "Licensing: GNU GPL v3.0\n";
     std::cout << "The DAWN of Linux is not Flatpak.\n";
 }
