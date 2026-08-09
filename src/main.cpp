@@ -12,8 +12,8 @@ void print_version()
 ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓████████▓▒░▒▓██████▓▒░ ░▒▓██████▓▒░  )" 
               << "\n\n";
-    std::cout << "Dawn Package System — Version 1.2.4-LTS\n";
-    std::cout << "Engine: Modern C++ 20 (Bare-Metal Execution Layer)\n";
+    std::cout << "hypecc Package Manager — Version 0.1.0-ALPHA\n";
+    std::cout << "Engine: Dawn Package System v1.2.4-LTS\n";
     std::cout << "Licensing: GNU GPL v3.0\n";
     std::cout << "The DAWN of Linux is not Flatpak.\n";
 }
