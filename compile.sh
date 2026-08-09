@@ -2,19 +2,19 @@
 
 set -e
 
-OUTPUT="hypecc"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-SOURCES=(
-    "src/main.cpp"
-    "src/core/engine.cpp"
-    "src/utils/network.cpp"
-)
+OUTPUT="$SCRIPT_DIR/hypecc"
+SOURCE="$SCRIPT_DIR/src/main.cpp"
 
-CXXFLAGS="-std=c++20 -Isrc -O3 -march=native"
+CXX="${CXX:-g++}"
+CXXFLAGS="-std=c++20 -O3 -march=native -Wall -Wextra"
 LDFLAGS="-lcurl"
 
-if g++ $CXXFLAGS "${SOURCES[@]}" -o "$OUTPUT" $LDFLAGS; then
-    echo "Compilation successful: ./$OUTPUT"
+echo "Derleniyor: $SOURCE -> $OUTPUT"
+
+if $CXX $CXXFLAGS "$SOURCE" -o "$OUTPUT" $LDFLAGS; then
+    echo "Compilation successful: $OUTPUT"
 else
     echo "Compilation failed."
     exit 1
