@@ -99,7 +99,6 @@ namespace hypecc::core
         }
         else
         {
-            // HALO'da özel remove.sh yoksa /usr/local/bin altındaki binary'yi temizle
             std::filesystem::path target_binary = std::filesystem::path("/usr/local/bin") / package_name;
             if (std::filesystem::exists(target_binary))
             {
