@@ -21,7 +21,7 @@ namespace dawn::core
     {
         ensure_root();
         
-        std::string script_content = hypecc:utils::Network::fetch_recipe(package_name, "install.sh");
+        std::string script_content = hypecc::utils::Network::fetch_recipe(package_name, "install.sh");
         std::filesystem::path staging_dir = "/tmp/dawn_staging";
         std::filesystem::create_directories(staging_dir);
         std::filesystem::path script_path = staging_dir / (package_name + "_install.sh");
