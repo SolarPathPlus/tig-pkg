@@ -4,9 +4,12 @@
 #include <fstream>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <filesystem>
 #include <cstdlib>
 #include <stdexcept>
+#include <sstream>
+#include <algorithm>
 #include <unistd.h>
 #include <curl/curl.h>
 
@@ -26,7 +29,6 @@ public:
 
         if (!file.is_open())
         {
-            std::cerr << "[hypecc] Error: Could not open " << filepath << "\n";
             return data;
         }
 
@@ -51,6 +53,25 @@ public:
             }
         }
         return data;
+    }
+
+    static void write(const std::string& filepath, const ConfxData& data)
+    {
+        std::ofstream file(filepath);
+        if (!file.is_open())
+        {
+            throw std::runtime_error("Error: Failed to write configuration file: " + filepath);
+        }
+
+        for (const auto& line : data.raw_lines)
+        {
+            file << line << "\n";
+        }
+
+        for (const auto& [key, value] : data.key_values)
+        {
+            file << key << "=" << value << "\n";
+        }
     }
 };
 
@@ -102,13 +123,200 @@ namespace hypecc::utils
 
         return read_buffer;
     }
+
+    class SystemScanner
+    {
+    public:
+        static void generate_project_config()
+        {
+            std::filesystem::path hypecc_dir = ".hypecc";
+            std::filesystem::create_directories(hypecc_dir);
+
+            std::filesystem::path config_path = hypecc_dir / "include.confx";
+            if (std::filesystem::exists(config_path))
+            {
+                std::cout << "[hypecc] Configuration environment already exists at " << config_path.string() << "\n";
+                return;
+            }
+
+            std::vector<std::string> target_includes = {
+                "/usr/include",
+                "/usr/local/include"
+            };
+
+            std::string detected_includes;
+            for (const auto& path : target_includes)
+            {
+                if (std::filesystem::exists(path))
+                {
+                    if (!detected_includes.empty())
+                    {
+                        detected_includes += ";";
+                    }
+                    detected_includes += path;
+                }
+            }
+
+            ConfxData data;
+            data.key_values["name"] = std::filesystem::current_path().filename().string();
+            data.key_values["cxx"] = "g++";
+            data.key_values["cxxflags"] = "-std=c++20 -O3 -Wall -Wextra";
+            data.key_values["include_dirs"] = detected_includes;
+            data.key_values["libs"] = "-lpthread -lm";
+            data.key_values["source_dir"] = "src";
+            data.key_values["output_binary"] = "build/app";
+            data.key_values["requires"] = "";
+
+            ConfxParser::write(config_path.string(), data);
+            std::cout << "[hypecc] Initialized project configuration environment at " << config_path.string() << "\n";
+        }
+    };
 }
 
 namespace hypecc::core
 {
+    class DependencySolver
+    {
+    public:
+        static void resolve_recursive(const std::string& package_name, std::unordered_set<std::string>& visited)
+        {
+            if (visited.find(package_name) != visited.end())
+            {
+                return;
+            }
+            visited.insert(package_name);
+
+            std::cout << "[hypecc] Resolving dependency graph node: " << package_name << "\n";
+
+            const char* home_env = std::getenv("HOME");
+            std::filesystem::path home_dir = home_env ? home_env : "/tmp";
+            std::filesystem::path cache_dir = home_dir / ".hypecc" / "cache" / package_name;
+            std::filesystem::create_directories(cache_dir);
+
+            std::string recipe_confx;
+            try
+            {
+                recipe_confx = hypecc::utils::Network::fetch_recipe(package_name, "recipe.confx");
+            }
+            catch (...)
+            {
+                return;
+            }
+
+            std::filesystem::path confx_path = cache_dir / "recipe.confx";
+            std::ofstream out(confx_path);
+            if (out.is_open())
+            {
+                out << recipe_confx;
+                out.close();
+            }
+
+            ConfxData data = ConfxParser::parse(confx_path.string());
+            auto it = data.key_values.find("requires");
+            if (it != data.key_values.end() && !it->second.empty())
+            {
+                std::stringstream ss(it->second);
+                std::string dep;
+                while (std::getline(ss, dep, ','))
+                {
+                    dep.erase(0, dep.find_first_not_of(" \t"));
+                    dep.erase(dep.find_last_not_of(" \t") + 1);
+                    if (!dep.empty())
+                    {
+                        resolve_recursive(dep, visited);
+                    }
+                }
+            }
+        }
+    };
+
+    class Builder
+    {
+    public:
+        static void build()
+        {
+            std::filesystem::path config_path = ".hypecc/include.confx";
+            if (!std::filesystem::exists(config_path))
+            {
+                throw std::runtime_error("Error: Missing project configuration file .hypecc/include.confx. Execute 'hypecc init' first.");
+            }
+
+            ConfxData config = ConfxParser::parse(config_path.string());
+
+            std::string compiler = config.key_values.count("cxx") ? config.key_values["cxx"] : "g++";
+            std::string flags = config.key_values.count("cxxflags") ? config.key_values["cxxflags"] : "-std=c++20";
+            std::string includes_raw = config.key_values.count("include_dirs") ? config.key_values["include_dirs"] : "";
+            std::string libs = config.key_values.count("libs") ? config.key_values["libs"] : "";
+            std::string src_dir_str = config.key_values.count("source_dir") ? config.key_values["source_dir"] : "src";
+            std::string output_binary = config.key_values.count("output_binary") ? config.key_values["output_binary"] : "build/app";
+
+            std::string include_flags;
+            if (!includes_raw.empty())
+            {
+                std::stringstream ss(includes_raw);
+                std::string path;
+                while (std::getline(ss, path, ';'))
+                {
+                    if (!path.empty())
+                    {
+                        include_flags += " -I" + path;
+                    }
+                }
+            }
+
+            std::filesystem::path src_dir(src_dir_str);
+            std::vector<std::string> sources;
+
+            if (std::filesystem::exists(src_dir) && std::filesystem::is_directory(src_dir))
+            {
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(src_dir))
+                {
+                    if (entry.is_regular_file() && entry.path().extension() == ".cpp")
+                    {
+                        sources.push_back(entry.path().string());
+                    }
+                }
+            }
+            else if (std::filesystem::exists("main.cpp"))
+            {
+                sources.push_back("main.cpp");
+            }
+
+            if (sources.empty())
+            {
+                throw std::runtime_error("Error: No C++ source files identified in target directory.");
+            }
+
+            std::filesystem::path out_path(output_binary);
+            if (out_path.has_parent_path())
+            {
+                std::filesystem::create_directories(out_path.parent_path());
+            }
+
+            std::string command = compiler + " " + flags + include_flags;
+            for (const auto& src : sources)
+            {
+                command += " " + src;
+            }
+            command += " " + libs + " -o " + output_binary;
+
+            std::cout << "[hypecc] Orchestrating build pipeline:\n" << command << "\n";
+            int status = std::system(command.c_str());
+            if (status != 0)
+            {
+                throw std::runtime_error("Error: Compilation directive returned a non-zero exit status.");
+            }
+
+            std::cout << "[hypecc] Build sequence executed successfully. Artifact location: " << output_binary << "\n";
+        }
+    };
+
     class Engine
     {
     public:
+        static void init_project();
+        static void build_project();
+        static void sync_project();
         static void install_package(const std::string& package_name);
         static void remove_package(const std::string& package_name);
         static void update_system();
@@ -125,6 +333,44 @@ namespace hypecc::core
         {
             throw std::runtime_error("Error: Root privileges are required for this administrative operation.");
         }
+    }
+
+    void Engine::init_project()
+    {
+        hypecc::utils::SystemScanner::generate_project_config();
+    }
+
+    void Engine::build_project()
+    {
+        hypecc::core::Builder::build();
+    }
+
+    void Engine::sync_project()
+    {
+        std::filesystem::path config_path = ".hypecc/include.confx";
+        if (!std::filesystem::exists(config_path))
+        {
+            throw std::runtime_error("Error: Missing project configuration file .hypecc/include.confx.");
+        }
+
+        ConfxData config = ConfxParser::parse(config_path.string());
+        auto it = config.key_values.find("requires");
+        if (it != config.key_values.end() && !it->second.empty())
+        {
+            std::unordered_set<std::string> visited;
+            std::stringstream ss(it->second);
+            std::string dep;
+            while (std::getline(ss, dep, ','))
+            {
+                dep.erase(0, dep.find_first_not_of(" \t"));
+                dep.erase(dep.find_last_not_of(" \t") + 1);
+                if (!dep.empty())
+                {
+                    hypecc::core::DependencySolver::resolve_recursive(dep, visited);
+                }
+            }
+        }
+        std::cout << "[hypecc] Workspace state and local cache synchronized successfully.\n";
     }
 
     void Engine::install_package(const std::string& package_name)
@@ -246,11 +492,44 @@ namespace hypecc::core
     void Engine::search_recipes(const std::string& query)
     {
         std::cout << "Scanning active Signature namespace blueprints for query: " << query << "\n";
+        try
+        {
+            std::string catalog = hypecc::utils::Network::fetch_recipe("../catalog.list", "catalog.list");
+            std::stringstream ss(catalog);
+            std::string line;
+            bool found = false;
+            while (std::getline(ss, line))
+            {
+                if (line.find(query) != std::string::npos)
+                {
+                    std::cout << "  - " << line << "\n";
+                    found = true;
+                }
+            }
+            if (!found)
+            {
+                std::cout << "No matching recipes identified for query: " << query << "\n";
+            }
+        }
+        catch (...)
+        {
+            std::cout << "  - " << query << " (Registry catalog unreachable)\n";
+        }
     }
 
     void Engine::show_recipe(const std::string& package_name)
     {
         std::cout << "Querying blueprint specifications for target: " << package_name << "\n";
+        try
+        {
+            std::string recipe = hypecc::utils::Network::fetch_recipe(package_name, "recipe.confx");
+            std::cout << recipe << "\n";
+        }
+        catch (...)
+        {
+            std::cout << "Target package: " << package_name << "\n";
+            std::cout << "Status: Recipe manifest unavailable in remote registry.\n";
+        }
     }
 }
 
@@ -265,7 +544,7 @@ void print_version()
 ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓████████▓▒░▒▓██████▓▒░ ░▒▓██████▓▒░  )" 
               << "\n\n";
-    std::cout << "hypecc Package Manager — Version 0.1.0-ALPHA\n";
+    std::cout << "hypecc Package Manager — Version 0.2.0-ALPHA\n";
     std::cout << "Engine: Dawn Package System v1.2.4-LTS\n";
     std::cout << "Licensing: GNU GPL v3.0\n";
     std::cout << "hypecc — Because C/C++ package management should actually be worth the hype.\n";
@@ -275,12 +554,15 @@ void print_help()
 {
     std::cout << "Usage: hypecc [options] command\n\n"
               << "Most used commands:\n"
-              << "  list         - List available recipes in the Signature registry\n"
-              << "  search       - Search through Signature recipe names and descriptions\n"
-              << "  show         - Display detailed information about a specific recipe\n"
-              << "  install      - Fetch a recipe from Signature and execute custom install logic\n"
-              << "  remove       - Remove a package natively\n"
-              << "  update       - Sync local package lists and Signature recipe cache\n\n"
+              << "  init            - Scan system headers and generate local project configuration (.hypecc/include.confx)\n"
+              << "  build           - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
+              << "  sync            - Synchronize workspace dependencies with local cache and Signature registry\n"
+              << "  list            - List available recipes in the Signature registry\n"
+              << "  search          - Search through Signature recipe names and descriptions\n"
+              << "  show            - Display detailed information about a specific recipe\n"
+              << "  install         - Fetch a recipe from Signature and execute custom install logic\n"
+              << "  remove          - Remove a package natively from the system\n"
+              << "  update          - Sync local package lists and Signature recipe cache\n\n"
               << "Options:\n"
               << "  -v, --version   - Display version manager information\n"
               << "  -h, --help      - Display the help menu\n";
@@ -305,6 +587,18 @@ int main(int argc, char* argv[])
         else if (command == "--help" || command == "-h")
         {
             print_help();
+        }
+        else if (command == "init")
+        {
+            hypecc::core::Engine::init_project();
+        }
+        else if (command == "build")
+        {
+            hypecc::core::Engine::build_project();
+        }
+        else if (command == "sync")
+        {
+            hypecc::core::Engine::sync_project();
         }
         else if (command == "install")
         {
