@@ -24,7 +24,7 @@ namespace dawn::utils
         }
 
         std::string read_buffer;
-        std::string url = "https://raw.githubusercontent.com/DawnPackageSystem/halo/main/recipes/" 
+        std::string url = "https://raw.githubusercontent.com/DawnPackageSystem/Signature/main/recipes/" 
                           + package_name + "/" + script_name;
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
