@@ -78,6 +78,6 @@ Under the GPLv3 mandate, this ecosystem operates under strict protective guideli
 * **Commercial and Private Use:** Anyone may freely execute, modify, and distribute this software and registry format for private or commercial infrastructure requirements.
 * **Source Disclosure (Copyleft):** Any modified versions, derivatives, or standalone utilities that link with or incorporate components of the Signature ecosystem must make their entire source code transparently available under the exact same GPLv3 license.
 * **Patent Protection:** The license includes an express grant of patent rights from contributors, preventing corporate entities from asserting patent litigation against the users or developers of this project.
-* **No Closed-Source Abstraction:** Proprietary backends, closed software stores, or containerized packaging systems cannot encapsulate or link with this utility without making their own integration mechanisms fully open-source.
+* **No Proprietaey Abstraction:** Proprietary backends, closed software stores, or containerized packaging systems cannot encapsulate or link with this utility without making their own integration mechanisms fully open-source.
 
 > hypernova-developer
