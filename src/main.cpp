@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
             }
             std::string package(argv[2]);
             std::cout << "Resolving package pipeline for '" << package << "'...\n";
-            dawn::core::Engine::install_package(package);
+            hypecc::core::Engine::install_package(package);
             std::cout << "Deployment sequence completed successfully.\n";
         }
         else if (command == "remove")
@@ -73,17 +73,17 @@ int main(int argc, char* argv[])
                 return 1;
             }
             std::string package(argv[2]);
-            dawn::core::Engine::remove_package(package);
+            hypecc::core::Engine::remove_package(package);
             std::cout << "Removal sequence completed successfully.\n";
         }
         else if (command == "update")
         {
-            dawn::core::Engine::update_system();
+            hypecc::core::Engine::update_system();
             std::cout << "Synchronized state successfully.\n";
         }
         else if (command == "list")
         {
-            dawn::core::Engine::list_recipes();
+            hypecc::core::Engine::list_recipes();
         }
         else if (command == "search")
         {
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
                 std::cerr << "Error: 'search' command requires a query string.\n";
                 return 1;
             }
-            dawn::core::Engine::search_recipes(argv[2]);
+            hypecc::core::Engine::search_recipes(argv[2]);
         }
         else if (command == "show")
         {
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
                 std::cerr << "Error: 'show' command requires a valid package identifier.\n";
                 return 1;
             }
-            dawn::core::Engine::show_recipe(argv[2]);
+            hypecc::core::Engine::show_recipe(argv[2]);
         }
         else
         {
