@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <unistd.h>
 
-namespace dawn::core
+namespace hypecc::core
 {
     void Engine::ensure_root()
     {
