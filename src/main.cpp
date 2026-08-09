@@ -20,7 +20,7 @@ void print_version()
 
 void print_help()
 {
-    std::cout << "Usage: dawn [options] command\n\n"
+    std::cout << "Usage: hypecc [options] command\n\n"
               << "Most used commands:\n"
               << "  list         - List available recipes in the Signature registry\n"
               << "  search       - Search through Signature recipe names and descriptions\n"
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
         {
             std::cerr << "Error: Unknown command or option '" << command << "'\n";
 
-            std::cout << "Usage: dawn [options] command\n\n"
+            std::cout << "Usage: hypecc [options] command\n\n"
                       << "Most used commands:\n"
                       << "  list         - List available recipes in the Signature registry\n"
                       << "  search       - Search through Signature recipe names and descriptions\n"
