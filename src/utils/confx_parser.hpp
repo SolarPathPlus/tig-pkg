@@ -30,7 +30,6 @@ public:
     std::string line;
     while (std::getline(file, line))
     {
-      // Boş satırları ve '#' ile başlayan yorumları atla
       if (line.empty() || line[0] == '#')
         continue;
 
