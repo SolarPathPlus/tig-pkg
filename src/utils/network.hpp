@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace dawn::utils
+namespace hypecc::utils
 {
     class Network
     {
