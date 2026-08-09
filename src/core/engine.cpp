@@ -22,7 +22,7 @@ namespace hypecc::core
         ensure_root();
         
         std::string script_content = hypecc::utils::Network::fetch_recipe(package_name, "install.sh");
-        std::filesystem::path staging_dir = "/tmp/dawn_staging";
+        std::filesystem::path staging_dir = "/tmp/hypecc_staging";
         std::filesystem::create_directories(staging_dir);
         std::filesystem::path script_path = staging_dir / (package_name + "_install.sh");
         
@@ -67,10 +67,9 @@ namespace hypecc::core
             has_remote_recipe = false;
         }
 
-        // HALO'da özel bir remove.sh tanımlıysa onu çalıştır
         if (has_remote_recipe)
         {
-            std::filesystem::path staging_dir = "/tmp/dawn_staging";
+            std::filesystem::path staging_dir = "/tmp/hypecc_staging";
             std::filesystem::create_directories(staging_dir);
             std::filesystem::path script_path = staging_dir / (package_name + "_remove.sh");
 
