@@ -115,7 +115,7 @@ namespace hypecc::core
     void Engine::update_system()
     {
         ensure_root();
-        std::cout << "Synchronizing HALO recipe manifest cache...\n";
+        std::cout << "Synchronizing Signature recipe manifest cache...\n";
     }
 
     void Engine::list_recipes()
@@ -134,7 +134,7 @@ namespace hypecc::core
 
     void Engine::search_recipes(const std::string& query)
     {
-        std::cout << "Scanning active HALO namespace blueprints for query: " << query << "\n";
+        std::cout << "Scanning active Signature namespace blueprints for query: " << query << "\n";
     }
 
     void Engine::show_recipe(const std::string& package_name)
