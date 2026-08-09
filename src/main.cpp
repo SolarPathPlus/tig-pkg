@@ -15,7 +15,7 @@ void print_version()
     std::cout << "hypecc Package Manager — Version 0.1.0-ALPHA\n";
     std::cout << "Engine: Dawn Package System v1.2.4-LTS\n";
     std::cout << "Licensing: GNU GPL v3.0\n";
-    std::cout << "The DAWN of Linux is not Flatpak.\n";
+    std::cout << "There are package managers for JS, Python, Rust etc. but why not with C and C++?\n";
 }
 
 void print_help()
