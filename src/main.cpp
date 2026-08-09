@@ -106,6 +106,19 @@ int main(int argc, char* argv[])
         else
         {
             std::cerr << "Error: Unknown command or option '" << command << "'\n";
+
+            std::cout << "Usage: dawn [options] command\n\n"
+                      << "Most used commands:\n"
+                      << "  list         - List available recipes in the Signature registry\n"
+                      << "  search       - Search through Signature recipe names and descriptions\n"
+                      << "  show         - Display detailed information about a specific recipe\n"
+                      << "  install      - Fetch a recipe from Signature and execute custom install logic\n"
+                      << "  remove       - Remove a package natively\n"
+                      << "  update       - Sync local package lists and Signature recipe cache\n\n"
+                      << "Options:\n"
+                      << "  -v, --version   - Display version manager information\n"
+                      << "  -h, --help      - Display the help menu\n";
+            
             return 1;
         }
     }
