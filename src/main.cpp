@@ -128,6 +128,7 @@ namespace hypecc::utils
     {
     public:
         static std::string fetch_recipe(const std::string& package_name, const std::string& script_name = "install.sh");
+        static std::string fetch_catalog();
     };
 
     namespace
@@ -166,6 +167,35 @@ namespace hypecc::utils
         if (res != CURLE_OK || response_code != 200)
         {
             throw std::runtime_error("Error: Failed to resolve registry pipeline for payload target.");
+        }
+
+        return read_buffer;
+    }
+
+    std::string Network::fetch_catalog()
+    {
+        CURL* curl = curl_easy_init();
+        if (!curl)
+        {
+            throw std::runtime_error("Critical: Failed to initialize network subsystem.");
+        }
+
+        std::string read_buffer;
+        std::string url = "https://raw.githubusercontent.com/hypecc-pm/Signature/main/catalog.list";
+
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+        CURLcode res = curl_easy_perform(curl);
+        long response_code = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+        curl_easy_cleanup(curl);
+
+        if (res != CURLE_OK || response_code != 200)
+        {
+            throw std::runtime_error("Error: Failed to resolve registry catalog.");
         }
 
         return read_buffer;
@@ -558,7 +588,7 @@ namespace hypecc::core
         std::cout << "Synchronizing remote registry manifests...\n";
         try
         {
-            std::string catalog = hypecc::utils::Network::fetch_recipe("../catalog.list", "catalog.list");
+            std::string catalog = hypecc::utils::Network::fetch_catalog();
             std::cout << catalog << "\n";
         }
         catch (...)
@@ -572,10 +602,11 @@ namespace hypecc::core
         std::cout << "Scanning active Signature namespace blueprints for query: " << query << "\n";
         try
         {
-            std::string catalog = hypecc::utils::Network::fetch_recipe("../catalog.list", "catalog.list");
+            std::string catalog = hypecc::utils::Network::fetch_catalog();
             std::stringstream ss(catalog);
             std::string line;
             bool found = false;
+
             while (std::getline(ss, line))
             {
                 if (line.find(query) != std::string::npos)
@@ -584,6 +615,7 @@ namespace hypecc::core
                     found = true;
                 }
             }
+
             if (!found)
             {
                 std::cout << "No matching recipes identified for query: " << query << "\n";
@@ -632,18 +664,18 @@ void print_help()
 {
     std::cout << "Usage: hypecc [options] command\n\n"
               << "Most used commands:\n"
-              << "  init            - Scan system headers and generate local project configuration (.hypecc/include.confx)\n"
-              << "  build           - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
-              << "  sync            - Synchronize workspace dependencies with local cache and Signature registry\n"
-              << "  list            - List available recipes in the Signature registry\n"
-              << "  search          - Search through Signature recipe names and descriptions\n"
-              << "  show            - Display detailed information about a specific recipe\n"
-              << "  install         - Fetch a recipe from Signature and execute custom install logic\n"
-              << "  remove          - Remove a package natively from the system\n"
-              << "  update          - Sync local package lists and Signature recipe cache\n\n"
+              << "  init             - Scan system headers and generate local project configuration (.hypecc/include.confx)\n"
+              << "  build            - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
+              << "  sync             - Synchronize workspace dependencies with local cache and Signature registry\n"
+              << "  list             - List available recipes in the Signature registry\n"
+              << "  search           - Search through Signature recipe names and descriptions\n"
+              << "  show             - Display detailed information about a specific recipe\n"
+              << "  install          - Fetch a recipe from Signature and execute custom install logic\n"
+              << "  remove           - Remove a package natively from the system\n"
+              << "  update           - Sync local package lists and Signature recipe cache\n\n"
               << "Options:\n"
-              << "  -v, --version   - Display version manager information\n"
-              << "  -h, --help      - Display the help menu\n";
+              << "  -v, --version    - Display version manager information\n"
+              << "  -h, --help       - Display the help menu\n";
 }
 
 int main(int argc, char* argv[])
