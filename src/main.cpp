@@ -654,7 +654,7 @@ void print_version()
 ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓████████▓▒░▒▓██████▓▒░ ░▒▓██████▓▒░  )" 
               << "\n\n";
-    std::cout << "hypecc Package Manager — Version 0.4.3-BETA\n";
+    std::cout << "hypecc Package Manager — Version 0.4.4-ALPHA\n";
     std::cout << "Engine: Dawn Package System v1.2.4-LTS\n";
     std::cout << "Licensing: GNU GPL v3.0\n";
     std::cout << "hypecc — Because C/C++ package management should actually be worth the hype.\n";
