@@ -75,7 +75,7 @@ public:
     }
 };
 
-namespace hypecc::utils
+namespace tig-pkg::utils
 {
     class ManifestManager
     {
@@ -151,7 +151,7 @@ namespace hypecc::utils
         }
 
         std::string read_buffer;
-        std::string url = "https://raw.githubusercontent.com/hypecc-pm/Signature/main/recipes/" 
+        std::string url = "https://raw.githubusercontent.com/SolarPathPlus/Signature/main/recipes/" 
                           + package_name + "/" + script_name;
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -181,7 +181,7 @@ namespace hypecc::utils
         }
 
         std::string read_buffer;
-        std::string url = "https://raw.githubusercontent.com/hypecc-pm/Signature/main/catalog.list";
+        std::string url = "https://raw.githubusercontent.com/tig-pkg-pm/Signature/main/catalog.list";
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -206,13 +206,13 @@ namespace hypecc::utils
     public:
         static void generate_project_config()
         {
-            std::filesystem::path hypecc_dir = ".hypecc";
-            std::filesystem::create_directories(hypecc_dir);
+            std::filesystem::path tig-pkg_dir = ".tig-pkg";
+            std::filesystem::create_directories(tig-pkg_dir);
 
-            std::filesystem::path config_path = hypecc_dir / "include.confx";
+            std::filesystem::path config_path = tig-pkg_dir / "include.confx";
             if (std::filesystem::exists(config_path))
             {
-                std::cout << "[hypecc] Configuration environment already exists at " << config_path.string() << "\n";
+                std::cout << "[tig-pkg] Configuration environment already exists at " << config_path.string() << "\n";
                 return;
             }
 
@@ -245,12 +245,12 @@ namespace hypecc::utils
             data.key_values["requires"] = "";
 
             ConfxParser::write(config_path.string(), data);
-            std::cout << "[hypecc] Initialized project configuration environment at " << config_path.string() << "\n";
+            std::cout << "[tig-pkg] Initialized project configuration environment at " << config_path.string() << "\n";
         }
     };
 }
 
-namespace hypecc::core
+namespace tig-pkg::core
 {
     class DependencySolver
     {
@@ -263,17 +263,17 @@ namespace hypecc::core
             }
             visited.insert(package_name);
 
-            std::cout << "[hypecc] Resolving dependency graph node: " << package_name << "\n";
+            std::cout << "[tig-pkg] Resolving dependency graph node: " << package_name << "\n";
 
             const char* home_env = std::getenv("HOME");
             std::filesystem::path home_dir = home_env ? home_env : "/tmp";
-            std::filesystem::path cache_dir = home_dir / ".hypecc" / "cache" / package_name;
+            std::filesystem::path cache_dir = home_dir / ".tig-pkg" / "cache" / package_name;
             std::filesystem::create_directories(cache_dir);
 
             std::string recipe_confx;
             try
             {
-                recipe_confx = hypecc::utils::Network::fetch_recipe(package_name, "recipe.confx");
+                recipe_confx = tig-pkg::utils::Network::fetch_recipe(package_name, "recipe.confx");
             }
             catch (...)
             {
@@ -312,10 +312,10 @@ namespace hypecc::core
     public:
         static void build()
         {
-            std::filesystem::path config_path = ".hypecc/include.confx";
+            std::filesystem::path config_path = ".tig-pkg/include.confx";
             if (!std::filesystem::exists(config_path))
             {
-                throw std::runtime_error("Error: Missing project configuration file .hypecc/include.confx. Execute 'hypecc init' first.");
+                throw std::runtime_error("Error: Missing project configuration file .tig-pkg/include.confx. Execute 'tig-pkg init' first.");
             }
 
             ConfxData config = ConfxParser::parse(config_path.string());
@@ -377,14 +377,14 @@ namespace hypecc::core
             }
             command += " " + libs + " -o " + output_binary;
 
-            std::cout << "[hypecc] Orchestrating build pipeline:\n" << command << "\n";
+            std::cout << "[tig-pkg] Orchestrating build pipeline:\n" << command << "\n";
             int status = std::system(command.c_str());
             if (status != 0)
             {
                 throw std::runtime_error("Error: Compilation directive returned a non-zero exit status.");
             }
 
-            std::cout << "[hypecc] Build sequence executed successfully. Artifact location: " << output_binary << "\n";
+            std::cout << "[tig-pkg] Build sequence executed successfully. Artifact location: " << output_binary << "\n";
         }
     };
 
@@ -414,20 +414,20 @@ namespace hypecc::core
 
     void Engine::init_project()
     {
-        hypecc::utils::SystemScanner::generate_project_config();
+        tig-pkg::utils::SystemScanner::generate_project_config();
     }
 
     void Engine::build_project()
     {
-        hypecc::core::Builder::build();
+        tig-pkg::core::Builder::build();
     }
 
     void Engine::sync_project()
     {
-        std::filesystem::path config_path = ".hypecc/include.confx";
+        std::filesystem::path config_path = ".tig-pkg/include.confx";
         if (!std::filesystem::exists(config_path))
         {
-            throw std::runtime_error("Error: Missing project configuration file .hypecc/include.confx.");
+            throw std::runtime_error("Error: Missing project configuration file .tig-pkg/include.confx.");
         }
 
         ConfxData config = ConfxParser::parse(config_path.string());
@@ -443,19 +443,19 @@ namespace hypecc::core
                 dep.erase(dep.find_last_not_of(" \t") + 1);
                 if (!dep.empty())
                 {
-                    hypecc::core::DependencySolver::resolve_recursive(dep, visited);
+                    tig-pkg::core::DependencySolver::resolve_recursive(dep, visited);
                 }
             }
         }
-        std::cout << "[hypecc] Workspace state and local cache synchronized successfully.\n";
+        std::cout << "[tig-pkg] Workspace state and local cache synchronized successfully.\n";
     }
 
     void Engine::install_package(const std::string& package_name)
     {
         ensure_root();
         
-        std::string script_content = hypecc::utils::Network::fetch_recipe(package_name, "install.sh");
-        std::filesystem::path staging_dir = "/tmp/hypecc_staging";
+        std::string script_content = tig-pkg::utils::Network::fetch_recipe(package_name, "install.sh");
+        std::filesystem::path staging_dir = "/tmp/tig-pkg_staging";
         std::filesystem::create_directories(staging_dir);
         std::filesystem::path script_path = staging_dir / (package_name + "_install.sh");
         
@@ -493,7 +493,7 @@ namespace hypecc::core
 
         try
         {
-            script_content = hypecc::utils::Network::fetch_recipe(package_name, "remove.sh");
+            script_content = tig-pkg::utils::Network::fetch_recipe(package_name, "remove.sh");
         }
         catch (...)
         {
@@ -502,7 +502,7 @@ namespace hypecc::core
 
         if (has_remote_recipe)
         {
-            std::filesystem::path staging_dir = "/tmp/hypecc_staging";
+            std::filesystem::path staging_dir = "/tmp/tig-pkg_staging";
             std::filesystem::create_directories(staging_dir);
             std::filesystem::path script_path = staging_dir / (package_name + "_remove.sh");
 
@@ -530,11 +530,11 @@ namespace hypecc::core
                 throw std::runtime_error("Error: Removal directive execution sequence returned an anomalous state.");
             }
 
-            hypecc::utils::ManifestManager::delete_manifest(package_name);
+            tig-pkg::utils::ManifestManager::delete_manifest(package_name);
             return;
         }
 
-        std::vector<std::string> manifest_paths = hypecc::utils::ManifestManager::read_paths(package_name);
+        std::vector<std::string> manifest_paths = tig-pkg::utils::ManifestManager::read_paths(package_name);
         if (!manifest_paths.empty())
         {
             for (auto it = manifest_paths.rbegin(); it != manifest_paths.rend(); ++it)
@@ -545,7 +545,7 @@ namespace hypecc::core
                     std::filesystem::remove_all(*it, ec);
                 }
             }
-            hypecc::utils::ManifestManager::delete_manifest(package_name);
+            tig-pkg::utils::ManifestManager::delete_manifest(package_name);
             return;
         }
 
@@ -568,7 +568,7 @@ namespace hypecc::core
             }
         }
 
-        hypecc::utils::ManifestManager::delete_manifest(package_name);
+        tig-pkg::utils::ManifestManager::delete_manifest(package_name);
 
         if (!removed_any)
         {
@@ -580,7 +580,7 @@ namespace hypecc::core
     {
         ensure_root();
         std::cout << "Synchronizing Signature recipe manifest cache...\n";
-        ConfxData config = ConfxParser::parse("/etc/hypecc/hypecc.conf");
+        ConfxData config = ConfxParser::parse("/etc/tig-pkg/tig-pkg.conf");
     }
 
     void Engine::list_recipes()
@@ -588,7 +588,7 @@ namespace hypecc::core
         std::cout << "Synchronizing remote registry manifests...\n";
         try
         {
-            std::string catalog = hypecc::utils::Network::fetch_catalog();
+            std::string catalog = tig-pkg::utils::Network::fetch_catalog();
             std::cout << catalog << "\n";
         }
         catch (...)
@@ -602,7 +602,7 @@ namespace hypecc::core
         std::cout << "Scanning active Signature namespace blueprints for query: " << query << "\n";
         try
         {
-            std::string catalog = hypecc::utils::Network::fetch_catalog();
+            std::string catalog = tig-pkg::utils::Network::fetch_catalog();
             std::stringstream ss(catalog);
             std::string line;
             bool found = false;
@@ -632,7 +632,7 @@ namespace hypecc::core
         std::cout << "Querying blueprint specifications for target: " << package_name << "\n";
         try
         {
-            std::string recipe = hypecc::utils::Network::fetch_recipe(package_name, "recipe.confx");
+            std::string recipe = tig-pkg::utils::Network::fetch_recipe(package_name, "recipe.confx");
             std::cout << recipe << "\n";
         }
         catch (...)
@@ -657,17 +657,17 @@ void print_version()
  ░░ ▒░█ ░░  ▒░█  ▒░█     ▄██ ▒░█ ░░░░░░░ ▒░█ ░░░░ ▓▒  ▒░█     ▄██
   ▀▀▀    ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀         ▀▀▀      ▒░   ▀▀▀▀▀▀▀▀▀▀)" 
               << "\n\n";
-    std::cout << "hypecc Package Manager — Version 0.4.4-ALPHA\n";
+    std::cout << "tig-pkg Package Manager — Version 0.4.4-ALPHA\n";
     std::cout << "Engine: Dawn Package System v1.2.4-LTS\n";
     std::cout << "Licensing: GNU GPL v3.0\n";
-    std::cout << "hypecc — Because C/C++ package management should actually be worth the hype.\n";
+    std::cout << "tig-pkg — Because C/C++ package management should actually be worth the hype.\n";
 }
 
 void print_help()
 {
-    std::cout << "Usage: hypecc [options] command\n\n"
+    std::cout << "Usage: tig-pkg [options] command\n\n"
               << "Most used commands:\n"
-              << "  init             - Scan system headers and generate local project configuration (.hypecc/include.confx)\n"
+              << "  init             - Scan system headers and generate local project configuration (.tig-pkg/include.confx)\n"
               << "  build            - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
               << "  sync             - Synchronize workspace dependencies with local cache and Signature registry\n"
               << "  list             - List available recipes in the Signature registry\n"
@@ -703,15 +703,15 @@ int main(int argc, char* argv[])
         }
         else if (command == "init")
         {
-            hypecc::core::Engine::init_project();
+            tig-pkg::core::Engine::init_project();
         }
         else if (command == "build")
         {
-            hypecc::core::Engine::build_project();
+            tig-pkg::core::Engine::build_project();
         }
         else if (command == "sync")
         {
-            hypecc::core::Engine::sync_project();
+            tig-pkg::core::Engine::sync_project();
         }
         else if (command == "install")
         {
@@ -722,7 +722,7 @@ int main(int argc, char* argv[])
             }
             std::string package(argv[2]);
             std::cout << "Resolving package pipeline for '" << package << "'...\n";
-            hypecc::core::Engine::install_package(package);
+            tig-pkg::core::Engine::install_package(package);
             std::cout << "Deployment sequence completed successfully.\n";
         }
         else if (command == "remove")
@@ -733,17 +733,17 @@ int main(int argc, char* argv[])
                 return 1;
             }
             std::string package(argv[2]);
-            hypecc::core::Engine::remove_package(package);
+            tig-pkg::core::Engine::remove_package(package);
             std::cout << "Removal sequence completed successfully.\n";
         }
         else if (command == "update")
         {
-            hypecc::core::Engine::update_system();
+            tig-pkg::core::Engine::update_system();
             std::cout << "Synchronized state successfully.\n";
         }
         else if (command == "list")
         {
-            hypecc::core::Engine::list_recipes();
+            tig-pkg::core::Engine::list_recipes();
         }
         else if (command == "search")
         {
@@ -752,7 +752,7 @@ int main(int argc, char* argv[])
                 std::cerr << "Error: 'search' command requires a query string.\n";
                 return 1;
             }
-            hypecc::core::Engine::search_recipes(argv[2]);
+            tig-pkg::core::Engine::search_recipes(argv[2]);
         }
         else if (command == "show")
         {
@@ -761,7 +761,7 @@ int main(int argc, char* argv[])
                 std::cerr << "Error: 'show' command requires a valid package identifier.\n";
                 return 1;
             }
-            hypecc::core::Engine::show_recipe(argv[2]);
+            tig-pkg::core::Engine::show_recipe(argv[2]);
         }
         else
         {
