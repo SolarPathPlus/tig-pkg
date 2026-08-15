@@ -75,7 +75,7 @@ public:
     }
 };
 
-namespace tig-pkg::utils
+namespace tig_pkg::utils
 {
     class ManifestManager
     {
@@ -206,10 +206,10 @@ namespace tig-pkg::utils
     public:
         static void generate_project_config()
         {
-            std::filesystem::path tig-pkg_dir = ".tig-pkg";
-            std::filesystem::create_directories(tig-pkg_dir);
+            std::filesystem::path tig_pkg_dir = ".tig-pkg";
+            std::filesystem::create_directories(tig_pkg_dir);
 
-            std::filesystem::path config_path = tig-pkg_dir / "include.confx";
+            std::filesystem::path config_path = tig_pkg_dir / "include.confx";
             if (std::filesystem::exists(config_path))
             {
                 std::cout << "[tig-pkg] Configuration environment already exists at " << config_path.string() << "\n";
@@ -250,7 +250,7 @@ namespace tig-pkg::utils
     };
 }
 
-namespace tig-pkg::core
+namespace tig_pkg::core
 {
     class DependencySolver
     {
@@ -273,7 +273,7 @@ namespace tig-pkg::core
             std::string recipe_confx;
             try
             {
-                recipe_confx = tig-pkg::utils::Network::fetch_recipe(package_name, "recipe.confx");
+                recipe_confx = tig_pkg::utils::Network::fetch_recipe(package_name, "recipe.confx");
             }
             catch (...)
             {
@@ -414,12 +414,12 @@ namespace tig-pkg::core
 
     void Engine::init_project()
     {
-        tig-pkg::utils::SystemScanner::generate_project_config();
+        tig_pkg::utils::SystemScanner::generate_project_config();
     }
 
     void Engine::build_project()
     {
-        tig-pkg::core::Builder::build();
+        tig_pkg::core::Builder::build();
     }
 
     void Engine::sync_project()
@@ -443,7 +443,7 @@ namespace tig-pkg::core
                 dep.erase(dep.find_last_not_of(" \t") + 1);
                 if (!dep.empty())
                 {
-                    tig-pkg::core::DependencySolver::resolve_recursive(dep, visited);
+                    tig_pkg::core::DependencySolver::resolve_recursive(dep, visited);
                 }
             }
         }
@@ -454,7 +454,7 @@ namespace tig-pkg::core
     {
         ensure_root();
         
-        std::string script_content = tig-pkg::utils::Network::fetch_recipe(package_name, "install.sh");
+        std::string script_content = tig_pkg::utils::Network::fetch_recipe(package_name, "install.sh");
         std::filesystem::path staging_dir = "/tmp/tig-pkg_staging";
         std::filesystem::create_directories(staging_dir);
         std::filesystem::path script_path = staging_dir / (package_name + "_install.sh");
@@ -493,7 +493,7 @@ namespace tig-pkg::core
 
         try
         {
-            script_content = tig-pkg::utils::Network::fetch_recipe(package_name, "remove.sh");
+            script_content = tig_pkg::utils::Network::fetch_recipe(package_name, "remove.sh");
         }
         catch (...)
         {
@@ -530,11 +530,11 @@ namespace tig-pkg::core
                 throw std::runtime_error("Error: Removal directive execution sequence returned an anomalous state.");
             }
 
-            tig-pkg::utils::ManifestManager::delete_manifest(package_name);
+            tig_pkg::utils::ManifestManager::delete_manifest(package_name);
             return;
         }
 
-        std::vector<std::string> manifest_paths = tig-pkg::utils::ManifestManager::read_paths(package_name);
+        std::vector<std::string> manifest_paths = tig_pkg::utils::ManifestManager::read_paths(package_name);
         if (!manifest_paths.empty())
         {
             for (auto it = manifest_paths.rbegin(); it != manifest_paths.rend(); ++it)
@@ -545,7 +545,7 @@ namespace tig-pkg::core
                     std::filesystem::remove_all(*it, ec);
                 }
             }
-            tig-pkg::utils::ManifestManager::delete_manifest(package_name);
+            tig_pkg::utils::ManifestManager::delete_manifest(package_name);
             return;
         }
 
@@ -568,7 +568,7 @@ namespace tig-pkg::core
             }
         }
 
-        tig-pkg::utils::ManifestManager::delete_manifest(package_name);
+        tig_pkg::utils::ManifestManager::delete_manifest(package_name);
 
         if (!removed_any)
         {
@@ -588,7 +588,7 @@ namespace tig-pkg::core
         std::cout << "Synchronizing remote registry manifests...\n";
         try
         {
-            std::string catalog = tig-pkg::utils::Network::fetch_catalog();
+            std::string catalog = tig_pkg::utils::Network::fetch_catalog();
             std::cout << catalog << "\n";
         }
         catch (...)
@@ -602,7 +602,7 @@ namespace tig-pkg::core
         std::cout << "Scanning active arc namespace blueprints for query: " << query << "\n";
         try
         {
-            std::string catalog = tig-pkg::utils::Network::fetch_catalog();
+            std::string catalog = tig_pkg::utils::Network::fetch_catalog();
             std::stringstream ss(catalog);
             std::string line;
             bool found = false;
@@ -632,7 +632,7 @@ namespace tig-pkg::core
         std::cout << "Querying blueprint specifications for target: " << package_name << "\n";
         try
         {
-            std::string recipe = tig-pkg::utils::Network::fetch_recipe(package_name, "recipe.confx");
+            std::string recipe = tig_pkg::utils::Network::fetch_recipe(package_name, "recipe.confx");
             std::cout << recipe << "\n";
         }
         catch (...)
@@ -646,16 +646,16 @@ namespace tig-pkg::core
 void print_version()
 {
     std::cout << "\n";
-    std::cout << R"(▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄    ▄▄▄           ▄▄▄▄▄▄▄▄▄
- ▓███▓    ███  ████▒       ████▒  ▀█▄  ███ ░░░░ ██▌ ████▒    
+    std::cout << R"(▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄    ▄▄▄            ▄▄▄▄▄▄▄▄▄
+ ▓███▓    ███  ████▒        ████▒   ▀█▄  ███ ░░░░ ██▌ ████▒    
  ░ ▒███▒ ░  ███  ███▓░ ░░░░  ███▓░ ░  ██ ███ ░░░░ ██▌ ███▓░ ░░░░
  ░ ░▓██░ ░  ▓██  ▓██▒ ▄▄▄▄▄▄ ▓██▒ ░░  ██ ▓██ ░░░  ██▌ ▓██▒ ▄▄▄▄▄▄
  ░  ▒▓█  ░  ▒▓█  ▒▓█ ░    ▒░ ▒▓█░   ▄█▀  ▒▓█    ▄██▀  ▒▓█ ░    ▒░
  ░░ ░▒▓ ░░  ░▒▓  ░▒▓ ░░░░ ▓▒ ░▒▓ ▀▀▀▀ ░░ ░▒▓ ▀▀▀██▄   ░▒▓ ░░░░ ▓▒
  ░░ █░▒ ░░  █░▒  █░▒ ░░░░ █▓ █░▒ ░░░░░░░ █░▒ ░░  ▀██  █░▒ ░░░░ █▓
  ░░ ░█░ ░░  ░█░  ░█░ ░░░░ ██ ░█░ ░░░░░░░ ░█░ ░░░░ █▓  ░█░ ░░░░ ██
- ░░ ▒░█ ░░  ▒░█  ▒░█     ▄██ ▒░█ ░░░░░░░ ▒░█ ░░░░ ▓▒  ▒░█     ▄██
-  ▀▀▀    ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀         ▀▀▀      ▒░   ▀▀▀▀▀▀▀▀▀▀)" 
+ ░░ ▒░█ ░░  ▒░█  ▒░█      ▄██ ▒░█ ░░░░░░░ ▒░█ ░░░░ ▓▒  ▒░█      ▄██
+  ▀▀▀    ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀          ▀▀▀     ▒░    ▀▀▀▀▀▀▀▀▀▀)" 
               << "\n\n";
     std::cout << "tig-pkg Package Manager — Version 0.4.4-ALPHA\n";
     std::cout << "Engine: hypecc Package Manager v1.0.0-LTS\n";
@@ -667,18 +667,18 @@ void print_help()
 {
     std::cout << "Usage: tig-pkg [options] command\n\n"
               << "Most used commands:\n"
-              << "  init             - Scan system headers and generate local project configuration (.tig-pkg/include.confx)\n"
-              << "  build            - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
-              << "  sync             - Synchronize workspace dependencies with local cache and arc registry\n"
-              << "  list             - List available recipes in the arc registry\n"
-              << "  search           - Search through arc recipe names and descriptions\n"
-              << "  show             - Display detailed information about a specific recipe\n"
-              << "  install          - Fetch a recipe from arc and execute custom install logic\n"
-              << "  remove           - Remove a package natively from the system\n"
-              << "  update           - Sync local package lists and arc recipe cache\n\n"
+              << "  init              - Scan system headers and generate local project configuration (.tig-pkg/include.confx)\n"
+              << "  build             - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
+              << "  sync              - Synchronize workspace dependencies with local cache and arc registry\n"
+              << "  list              - List available recipes in the arc registry\n"
+              << "  search            - Search through arc recipe names and descriptions\n"
+              << "  show              - Display detailed information about a specific recipe\n"
+              << "  install           - Fetch a recipe from arc and execute custom install logic\n"
+              << "  remove            - Remove a package natively from the system\n"
+              << "  update            - Sync local package lists and arc recipe cache\n\n"
               << "Options:\n"
-              << "  -v, --version    - Display version manager information\n"
-              << "  -h, --help       - Display the help menu\n";
+              << "  -v, --version     - Display version manager information\n"
+              << "  -h, --help        - Display the help menu\n";
 }
 
 int main(int argc, char* argv[])
@@ -703,15 +703,15 @@ int main(int argc, char* argv[])
         }
         else if (command == "init")
         {
-            tig-pkg::core::Engine::init_project();
+            tig_pkg::core::Engine::init_project();
         }
         else if (command == "build")
         {
-            tig-pkg::core::Engine::build_project();
+            tig_pkg::core::Engine::build_project();
         }
         else if (command == "sync")
         {
-            tig-pkg::core::Engine::sync_project();
+            tig_pkg::core::Engine::sync_project();
         }
         else if (command == "install")
         {
@@ -722,7 +722,7 @@ int main(int argc, char* argv[])
             }
             std::string package(argv[2]);
             std::cout << "Resolving package pipeline for '" << package << "'...\n";
-            tig-pkg::core::Engine::install_package(package);
+            tig_pkg::core::Engine::install_package(package);
             std::cout << "Deployment sequence completed successfully.\n";
         }
         else if (command == "remove")
@@ -733,17 +733,17 @@ int main(int argc, char* argv[])
                 return 1;
             }
             std::string package(argv[2]);
-            tig-pkg::core::Engine::remove_package(package);
+            tig_pkg::core::Engine::remove_package(package);
             std::cout << "Removal sequence completed successfully.\n";
         }
         else if (command == "update")
         {
-            tig-pkg::core::Engine::update_system();
+            tig_pkg::core::Engine::update_system();
             std::cout << "Synchronized state successfully.\n";
         }
         else if (command == "list")
         {
-            tig-pkg::core::Engine::list_recipes();
+            tig_pkg::core::Engine::list_recipes();
         }
         else if (command == "search")
         {
@@ -752,7 +752,7 @@ int main(int argc, char* argv[])
                 std::cerr << "Error: 'search' command requires a query string.\n";
                 return 1;
             }
-            tig-pkg::core::Engine::search_recipes(argv[2]);
+            tig_pkg::core::Engine::search_recipes(argv[2]);
         }
         else if (command == "show")
         {
@@ -761,7 +761,7 @@ int main(int argc, char* argv[])
                 std::cerr << "Error: 'show' command requires a valid package identifier.\n";
                 return 1;
             }
-            tig-pkg::core::Engine::show_recipe(argv[2]);
+            tig_pkg::core::Engine::show_recipe(argv[2]);
         }
         else
         {
