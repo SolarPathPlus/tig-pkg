@@ -430,14 +430,14 @@ namespace tig_pkg::core
     void Engine::install_package(const std::string& package_name)
     {
         std::string script_content = tig_pkg::utils::Network::fetch_recipe(package_name, "install.bat");
-        
+
         std::filesystem::path local_include = "include";
         std::filesystem::create_directories(local_include);
 
         std::filesystem::path staging_dir = ".tig-pkg\\staging";
         std::filesystem::create_directories(staging_dir);
         std::filesystem::path script_path = staging_dir / (package_name + "_install.bat");
-        
+
         std::ofstream out_file(script_path);
         if (!out_file.is_open())
         {
@@ -613,7 +613,7 @@ namespace tig_pkg::core
 void print_version()
 {
     std::cout << "\n";
-    std::cout << R"(▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄    ▄▄▄             ▄▄▄▄▄▄▄▄▄
+    std::cout << R"(▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄    ▄▄▄              ▄▄▄▄▄▄▄▄▄
  ▓███▓    ███  ████▒        ████▒    ▀█▄  ███ ░░░░ ██▌ ████▒    
  ░ ▒███▒ ░  ███  ███▓░ ░░░░   ███▓░ ░   ██ ███ ░░░░ ██▌ ███▓░ ░░░░
  ░ ░▓██░ ░  ▓██  ▓██▒ ▄▄▄▄▄▄ ▓██▒ ░░   ██ ▓██ ░░░  ██▌ ▓██▒ ▄▄▄▄▄▄
@@ -622,7 +622,7 @@ void print_version()
  ░░ █░▒ ░░  █░▒  █░▒ ░░░░ █▓ █░▒ ░░░░░░░ █░▒ ░░  ▀██  █░▒ ░░░░ █▓
  ░░ ░█░ ░░  ░█░  ░█░ ░░░░ ██ ░█░ ░░░░░░░ ░█░ ░░░░ █▓  ░█░ ░░░░ ██
  ░░ ▒░█ ░░  ▒░█  ▒░█      ▄██ ▒░█ ░░░░░░░ ▒░█ ░░░░ ▓▒  ▒░█      ▄██
-  ▀▀▀     ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀          ▀▀▀      ▒░    ▀▀▀▀▀▀▀▀▀▀)" 
+  ▀▀▀      ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀          ▀▀▀      ▒░    ▀▀▀▀▀▀▀▀▀▀)" 
               << "\n\n";
     std::cout << "tig-pkg Package Manager — Version 0.4.4-ALPHA\n";
     std::cout << "Engine: Dawn Package System v1.2.4-LTS\n";
