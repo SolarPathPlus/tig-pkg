@@ -1,83 +1,82 @@
-# The hypecc Project: Next-Generation C/C++ Package Manager and Build Orchestration Engine
+# The tig-pkg Project: Bare-Metal Package Orchestration Engine for TIG Software Ecosystems
 
-The hypecc Project represents a paradigm shift in how modern C and C++ development environments manage upstream source recipes, compilation targets, and dependency specifications. Conceived out of an absolute necessity to eliminate legacy build system bloat, complex markup languages like JSON or TOML, and rigid package abstractions, hypecc is a high-performance C/C++ package manager engineered to work directly with lightweight, recipe-driven registries like Signature. It acts as an autonomous execution engine that seamlessly orchestrates the resolution of raw compilation blueprints, completely eliminating the traditional friction, build environment fragmentation, and dependency on heavy package management frameworks.
+The tig-pkg Project represents a paradigm shift in how high-performance C and C++ software environments manage system wrappers, team-developed libraries, and binary deployment directives across cross-platform infrastructure. Engineered explicitly to serve the TIG (Technology & Integration Group) software ecosystem, tig-pkg is an autonomous execution engine created to streamline the distribution, build orchestration, and deployment of native applications. Operating in direct symbiosis with its declarative recipe registry, **Arc**, tig-pkg completely eliminates traditional build system bloat, heavy runtime abstractions, and fragile dependency environments.
 
-Rather than introducing redundant configuration layers, heavy build wrappers, or relying on system-specific package databases that clutter host environments, hypecc integrates symmetrically with lightweight source-based build flows. By utilizing a clean, recipe-driven directory structure, the underlying C++ engine dynamically traverses external endpoints, fetches pure configuration directives, and prepares them directly for the local compilation and linking pipeline. The result is a lightning-fast, zero-overhead build layer that is entirely environment-agnostic, respecting only compiler standards and target machine constraints.
+Rather than introducing redundant configuration layers or relying on system-specific package databases that clutter host environments, tig-pkg integrates symmetrically with bare-metal source structures and pre-compiled upstream binary streams. Utilizing a clean, key-value based configuration architecture (`.confx`), the C++20 engine dynamically traverses external endpoints, resolves recursive dependency graphs, and executes native installation sequences with sub-millisecond precision. The result is a lightning-fast, zero-overhead package management engine that preserves absolute environment integrity while respecting target machine constraints.
 
 ---
 
 ## Architectural Philosophy
 
-The fundamental philosophy governing the hypecc Project rests upon three immutable pillars: absolute bare-metal simplicity, strict structural minimalist design, and total developer sovereignty. Modern C/C++ package management has increasingly leaned toward thick containerized build environments or monolithic package managers that enforce heavy internal abstractions, duplicate shared libraries, and introduce unpredictable build penalties. hypecc completely rejects this trajectory. By returning to plain text recipes (`.conf`) and bypassing complex build markup systems, metadata overhead is minimized and direct control over compiler flags, include paths, and linking flags is restored entirely to the software engineer.
+The fundamental philosophy governing the tig-pkg Project rests upon three immutable pillars: absolute bare-metal simplicity, strict structural minimalist design, and total developer sovereignty. Legacy C/C++ package management has increasingly leaned toward resource-intensive, containerized runtime layers or complex build generators that duplicate shared libraries, pollute system paths, and introduce unpredictable performance penalties. tig-pkg completely rejects this trajectory. By utilizing lightweight configuration formats (`.confx`) and bypassing complex build markup systems, metadata overhead is minimized, restoring direct control over compiler flags, include paths, and native system binaries to the software engineer.
 
-Furthermore, hypecc treats the host operating system with absolute freedom. It does not attempt to bind itself to any distribution package manager or specific toolchain vendor; instead, it serves as a universal, standalone build orchestration layer that interfaces directly with official upstream source repositories and raw archive endpoints. Every recipe managed through the hypecc pipeline is organized cleanly into standard plain text key-value directives, ensuring that build specifications remain central, lightweight, and completely transparent to the developer.
+Furthermore, tig-pkg treats the host operating system with absolute respect. It does not attempt to bind itself to proprietary store models or unmonitored installation paths; instead, it serves as a universal, standalone orchestration layer that interfaces directly with team repositories and official binary endpoints. Every package managed through the tig-pkg pipeline maintains explicit tracking registers via its local `ManifestManager` subsystem, ensuring that installations are clean, contained, and completely reversible.
 
 ---
 
-## The Symbiotic Architecture: hypecc and Signature Interconnection
+## The Symbiotic Architecture: tig-pkg and Arc Interconnection
 
-The structural integrity of this ecosystem relies entirely on a deterministic, decoupled relationship between the compiled execution engine, hypecc, and the decentralized directive registry, Signature. hypecc does not operate in isolation, nor does it maintain monolithic hardcoded build rules; instead, it functions as the high-performance C++ muscle that executes build and linking decisions based on the lightweight intelligence provided by Signature. Signature acts as the single source of truth for upstream repository mapping, offering a clean, repository-driven pipeline that shields the core C/C++ package manager from static dependencies and endpoint volatility.
+The structural integrity of this ecosystem relies entirely on a deterministic, decoupled relationship between the compiled C++ execution engine, tig-pkg, and its centralized directive registry, Arc. tig-pkg does not operate with hardcoded deployment logic; instead, it functions as the high-performance C++ muscle that executes build, dependency resolution, and installation steps based on the lightweight intelligence provided by Arc. Arc acts as the single source of truth for TIG library wrappers, custom system utilities, and application blueprints.
 
-When a package build or dependency pull operation is initiated, hypecc establishes a stateless network connection to interface with the Signature registry, parsing targeted recipe structures with sub-millisecond precision. Once hypecc ingests the verified recipe from Signature, it immediately translates those directives into universal compiler instructions, fetches the upstream source assets, sets the required include paths, and executes the local build sequence. This absolute separation of concerns ensures that the core engine remains lightweight, rigid, and maintenance-free, while the recipe ecosystem can scale dynamically, independently, and globally across any target platform.
+When a package installation, build, or workspace sync operation is initiated, tig-pkg establishes a stateless HTTPS connection to interface with the Arc registry, parsing targeted platform manifests (`posix/` or `windows/`) with absolute speed. Once tig-pkg ingests the verified recipe directives from Arc, it immediately resolves recursive dependency requirements, stages native installation scripts in temporary execution sandboxes, and executes the deployment sequence. This division of labor ensures that while the core binary remains lightweight, rigid, and maintenance-free, the recipe ecosystem can scale dynamically across heterogeneous operating environments.
 
 ---
 
 ## Technical Overview of the Core Ecosystem
 
-### HYPECC: The Core C/C++ Package Engine Governing Build States
+### TIG-PKG: The High-Performance Native Orchestration Engine
 
-HYPECC is a high-performance developer utility compiled directly into a single, native binary file. It is built for raw compilation speed and structural efficiency.
+tig-pkg is a bare-metal package manager compiled directly into a single, native executable file. It is built for maximum speed, memory efficiency, and structural reliability.
 
-* **No Compiler Hand-Holding:** Unlike modern languages that rely on restrictive borrow checkers or runtime engines that treat the developer like a child by blocking access to memory addresses, hypecc grants full sovereignty. Memory management is optimized directly at the hardware layer, ensuring instant build execution without safety overhead.
-* **Universal Standalone Orchestration:** hypecc completely bypasses legacy build system generators. The moment a package build is triggered, the engine establishes an immediate network connection to the Signature registry, targets the upstream source repository, fetches the recipe directives, and links the compiled outputs directly to local project paths.
-* **Absolute Resource Efficiency:** hypecc does not carry massive runtime dependencies, heavy interpreter layers, or standalone daemon processes. It is a lightweight build orchestration tool designed to maximize execution speed while maintaining a zero-byte passive footprint.
+* **Autonomous Build & System Orchestration:** tig-pkg completely bypasses legacy build system generators like CMake or Makefiles for local project management. Through its `init` and `build` commands, the engine automatically scans system headers, generates local `.tig-pkg/include.confx` configurations, and orchestrates direct compiler invocations.
+* **Declarative Workspace Synchronization:** By evaluating the `requires` parameters within local project configs, tig-pkg recursively traverses dependency graphs, pulling required TIG libraries and external wrappers into local caches without manual toolchain configuration.
+* **Manifest-Tracked Package Lifecycle:** Every deployed binary or library is recorded in local system manifests (`.list` files within system AppData or ProgramData). The engine handles full package teardowns via `remove`, guaranteeing zero residual residue on host machines.
 
-### SIGNATURE: The Autonomous Plain Text Recipe Registry
+### ARC: The Sovereign Recipe Registry Infrastructure
 
-SIGNATURE serves as the deterministic instruction layer for the core engine, replacing bloated build scripts with clean, automated directive logic.
+ARC serves as the deterministic instruction repository for the core engine, replacing opaque package scripts with clean, declarative directive logic.
 
-* **Pure Recipe Specifications:** The SIGNATURE repository contains strictly verified, plain text recipe files (`.conf`) that map out precise upstream source paths, header locations, and library flags. hypecc parses these configurations instantly, avoiding the need for complex build script execution.
-* **Source and Header Distribution Standards:** SIGNATURE prioritizes plain text recipe blueprints. This design eliminates the requirement for maintaining monolithic build system scripts, ensuring clean, reproducible build pipelines across any platform supporting C and C++.
+* **Platform-Isolated Blueprint Directories:** The ARC repository structures deployment configurations into dedicated namespaces, ensuring that target OS parameters (such as `install.bat` routines for Windows or POSIX equivalents) remain isolated and predictable.
+* **Zero Compilation Footprint Strategy:** ARC prioritizes pre-compiled native binaries and streamlined header distribution blueprints. This design eliminates the requirement for heavy local build environments, ensuring fast and reproducible deployments across target machines.
 
 ---
 
 ## Distribution Paradigms and Integration Manifesto
 
-### A Universal Alternative to Legacy Abstractions
+### A Bare-Metal Alternative to Monolithic Abstractions
 
-Traditional C/C++ build orchestration forces developers to navigate severe, systemic contradictions: accept bloated build system wrappers, jeopardize project portability by writing platform-specific scripts, or tolerate the forced adoption of heavy package managers that hide raw compiler flags.
+Traditional C/C++ development environments force teams to navigate severe, systemic contradictions: endure heavy container wrappers like Flatpak/Snap, manage brittle rolling dependencies in community archives, or write fragile, platform-specific build scripts that break across different developer setups.
 
-hypecc provides a high-performance alternative for all C/C++ developers by cutting through these forced abstractions. It completely bypasses complex build file generation, proprietary package formats, and system dependency hell. By fetching recipe specifications directly from the Signature repository and applying them to standard source directories, it delivers instantaneous header resolution and seamless native compiler integration across any system framework. Developers can finally manage third-party C and C++ libraries without sacrificing build speed, disk space, or project sovereignty to overly opinionated build systems.
+tig-pkg provides a high-performance alternative for engineering teams by cutting through these forced abstractions. It completely bypasses complex build file generation, proprietary package formats, and dependency hell. By fetching clean recipe specifications directly from the Arc repository and applying them to native system directories or local project paths, it delivers instantaneous header resolution, automated linking, and seamless native integration. Teams can finally distribute and manage C/C++ libraries, custom CLI tools, and system wrappers without sacrificing execution speed, disk space, or project sovereignty.
 
 ---
 
 ## Comparative Architectural Analysis
 
-### hypecc/Signature vs. CMake / pkg-config
+### tig-pkg/Arc vs. CMake / pkg-config
 
-The distinction between the hypecc ecosystem and traditional build systems like CMake or pkg-config centers on fundamental architectural philosophy and structural complexity. CMake enforces complex script parsing layers and generates intermediate build system files, frequently introducing unpredictable syntax issues and slow configuration times for simple C/C++ projects.
+The distinction between the tig-pkg ecosystem and traditional build systems like CMake or pkg-config centers on fundamental architectural philosophy and operational latency. CMake enforces complex script parsing layers and generates intermediate build files, frequently introducing syntax ambiguities and slow configuration times.
 
-Conversely, hypecc utilizes plain text key-value recipes via Signature to supply raw compiler and linker flags directly. hypecc does not require intermediate build file generation; it leverages standard C/C++ toolchain capabilities directly. This ensures zero configuration latency, instantaneous build initialization, and authentic control over include directories and library linking without intermediate file generation steps.
+Conversely, tig-pkg utilizes plain text key-value recipes (`.confx`) via Arc to supply raw compiler flags, include paths, and linker directives directly. tig-pkg does not require intermediate build script generation; it leverages native compiler capabilities directly. This ensures zero configuration latency, instantaneous build initialization, and precise control over header and library linking.
 
-### hypecc/Signature vs. Conan / Vcpkg
+### tig-pkg/Arc vs. Heavy Package Managers (Conan / Vcpkg)
 
-While both paradigms attempt to solve C/C++ package management, their execution mechanics are completely different. Systems like Conan or Vcpkg rely on heavy Python runtimes or complex CMake integration scripts to pull pre-compiled binaries or execute massive local build trees within rigid directory structures, frequently causing binary incompatibility and runtime conflicts.
+While systems like Conan or Vcpkg attempt to solve C/C++ package management, they rely heavily on Python runtimes, complex CMake hooks, or massive local compilation trees that cause binary incompatibilities and extreme build times.
 
-hypecc dramatically optimizes this workflow by focusing strictly on transparent plain text recipes. Parsed by the compiled, deterministic hypecc engine written in C++20, recipes supply direct build directives with absolute speed, removing heavy runtime dependencies and mitigating environment fragmentation across the entire software development lifecycle.
+tig-pkg dramatically optimizes this workflow by focusing on lightweight, transparent directives. Parsed by the compiled, deterministic tig-pkg engine written in C++20, recipes supply direct build and installation directives with absolute speed, removing heavy runtime dependencies and mitigating environment fragmentation across the entire software development lifecycle.
 
 ---
 
 ## Licensing and Ownership
 
-The hypecc Project is an open-source initiative dedicated to the software development community. The core package manager framework is architected, maintained, and actively developed by **hypernova-developer**. In accordance with the principles of software freedom and copyleft protection, the entire framework is officially distributed under the terms of the **GNU General Public License v3.0 (GPLv3)**. For complete legal provisions, conditions, and permissions, please refer directly to the `LICENSE` file located within the root directory of this repository.
+The tig-pkg Project is an open-source initiative dedicated to the software development community. The core package manager framework and its accompanying ecosystem architectures are designed, maintained, and actively developed by **hypernova-developer**. In accordance with the principles of software freedom and copyleft protection, the entire framework is officially distributed under the terms of the **GNU General Public License v3.0 (GPLv3)**. For complete legal provisions, conditions, and permissions, please refer directly to the `LICENSE` file located within the root directory of this repository.
 
 ### Summary of Licensing Terms and Obligations
 
 Under the GPLv3 mandate, this ecosystem operates under strict protective guidelines to ensure it remains open and un-monopolized:
 
 * **Commercial and Private Use:** Anyone may freely execute, modify, and distribute this software for private or commercial infrastructure requirements.
-* **Source Disclosure (Copyleft):** Any modified versions, derivatives, or standalone utilities that link with or incorporate components of the hypecc engine must make their entire source code transparently available under the exact same GPLv3 license.
+* **Source Disclosure (Copyleft):** Any modified versions, derivatives, or standalone utilities that link with or incorporate components of the tig-pkg engine must make their entire source code transparently available under the exact same GPLv3 license.
 * **Patent Protection:** The license includes an express grant of patent rights from contributors, preventing corporate entities from asserting patent litigation against the users or developers of this project.
 * **No Proprietary Abstraction:** Proprietary backends, closed software stores, or containerized packaging systems cannot encapsulate or link with this utility without making their own integration mechanisms fully open-source.
 
-> hypernova-developer
