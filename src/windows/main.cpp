@@ -84,7 +84,7 @@ namespace tig_pkg::utils
         {
             const char* appdata = std::getenv("LOCALAPPDATA");
             std::filesystem::path base_dir = appdata ? appdata : "C:\\ProgramData";
-            return (base_dir / "Signature" / "manifests" / (package_name + ".list")).string();
+            return (base_dir / "arc" / "manifests" / (package_name + ".list")).string();
         }
 
         static bool record_path(const std::string& package_name, const std::string& target_path)
@@ -92,7 +92,7 @@ namespace tig_pkg::utils
             std::error_code ec;
             const char* appdata = std::getenv("LOCALAPPDATA");
             std::filesystem::path base_dir = appdata ? appdata : "C:\\ProgramData";
-            std::filesystem::create_directories(base_dir / "Signature" / "manifests", ec);
+            std::filesystem::create_directories(base_dir / "arc" / "manifests", ec);
 
             std::ofstream file(get_manifest_path(package_name), std::ios::app);
             if (!file.is_open())
@@ -156,7 +156,7 @@ namespace tig_pkg::utils
         }
 
         std::string read_buffer;
-        std::string url = "https://raw.githubusercontent.com/SolarPathPlus/Signature/main/recipes/" 
+        std::string url = "https://raw.githubusercontent.com/SolarPathPlus/arc/main/recipes/" 
                           + package_name + "/" + script_name;
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -186,7 +186,7 @@ namespace tig_pkg::utils
         }
 
         std::string read_buffer;
-        std::string url = "https://raw.githubusercontent.com/SolarPathPlus/Signature/main/catalog.list";
+        std::string url = "https://raw.githubusercontent.com/SolarPathPlus/arc/main/catalog.list";
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -593,7 +593,7 @@ namespace tig_pkg::core
     void Engine::update_system()
     {
         ensure_root();
-        std::cout << "Synchronizing Signature recipe manifest cache...\n";
+        std::cout << "Synchronizing arc recipe manifest cache...\n";
         const char* programdata = std::getenv("PROGRAMDATA");
         std::filesystem::path conf_path = programdata ? programdata : "C:\\ProgramData";
         conf_path /= "tig-pkg\\tig-pkg.conf";
@@ -616,7 +616,7 @@ namespace tig_pkg::core
 
     void Engine::search_recipes(const std::string& query)
     {
-        std::cout << "Scanning active Signature namespace blueprints for query: " << query << "\n";
+        std::cout << "Scanning active arc namespace blueprints for query: " << query << "\n";
         try
         {
             std::string catalog = tig_pkg::utils::Network::fetch_catalog();
@@ -686,13 +686,13 @@ void print_help()
               << "Most used commands:\n"
               << "  init             - Scan system headers and generate local project configuration (.tig-pkg/include.confx)\n"
               << "  build            - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
-              << "  sync             - Synchronize workspace dependencies with local cache and Signature registry\n"
-              << "  list             - List available recipes in the Signature registry\n"
-              << "  search           - Search through Signature recipe names and descriptions\n"
+              << "  sync             - Synchronize workspace dependencies with local cache and arc registry\n"
+              << "  list             - List available recipes in the arc registry\n"
+              << "  search           - Search through arc recipe names and descriptions\n"
               << "  show             - Display detailed information about a specific recipe\n"
-              << "  install          - Fetch a recipe from Signature and execute custom install logic\n"
+              << "  install          - Fetch a recipe from arc and execute custom install logic\n"
               << "  remove           - Remove a package natively from the system\n"
-              << "  update           - Sync local package lists and Signature recipe cache\n\n"
+              << "  update           - Sync local package lists and arc recipe cache\n\n"
               << "Options:\n"
               << "  -v, --version    - Display version manager information\n"
               << "  -h, --help       - Display the help menu\n";
