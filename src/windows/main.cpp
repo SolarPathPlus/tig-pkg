@@ -82,17 +82,15 @@ namespace tig_pkg::utils
     public:
         static std::string get_manifest_path(const std::string& package_name)
         {
-            const char* appdata = std::getenv("LOCALAPPDATA");
-            std::filesystem::path base_dir = appdata ? appdata : "C:\\ProgramData";
-            return (base_dir / "arc" / "manifests" / (package_name + ".list")).string();
+            std::filesystem::path base_dir = ".tig-pkg";
+            return (base_dir / "manifests" / (package_name + ".list")).string();
         }
 
         static bool record_path(const std::string& package_name, const std::string& target_path)
         {
             std::error_code ec;
-            const char* appdata = std::getenv("LOCALAPPDATA");
-            std::filesystem::path base_dir = appdata ? appdata : "C:\\ProgramData";
-            std::filesystem::create_directories(base_dir / "arc" / "manifests", ec);
+            std::filesystem::path base_dir = ".tig-pkg";
+            std::filesystem::create_directories(base_dir / "manifests", ec);
 
             std::ofstream file(get_manifest_path(package_name), std::ios::app);
             if (!file.is_open())
@@ -221,24 +219,9 @@ namespace tig_pkg::utils
                 return;
             }
 
-            std::vector<std::string> target_includes = {
-                "C:\\MSYS2\\mingw64\\include",
-                "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC",
-                "C:\\mingw64\\include"
-            };
+            std::filesystem::create_directories("include");
 
-            std::string detected_includes;
-            for (const auto& path : target_includes)
-            {
-                if (std::filesystem::exists(path))
-                {
-                    if (!detected_includes.empty())
-                    {
-                        detected_includes += ";";
-                    }
-                    detected_includes += path;
-                }
-            }
+            std::string detected_includes = "include";
 
             ConfxData data;
             data.key_values["name"] = std::filesystem::current_path().filename().string();
@@ -271,10 +254,7 @@ namespace tig_pkg::core
 
             std::cout << "[tig-pkg] Resolving dependency graph node: " << package_name << "\n";
 
-            const char* userprofile = std::getenv("USERPROFILE");
-            const char* temp_env = std::getenv("TEMP");
-            std::filesystem::path base_dir = userprofile ? userprofile : (temp_env ? temp_env : "C:\\Temp");
-            std::filesystem::path cache_dir = base_dir / ".tig-pkg" / "cache" / package_name;
+            std::filesystem::path cache_dir = std::filesystem::path(".tig-pkg") / "cache" / package_name;
             std::filesystem::create_directories(cache_dir);
 
             std::string recipe_confx;
@@ -329,7 +309,7 @@ namespace tig_pkg::core
 
             std::string compiler = config.key_values.count("cxx") ? config.key_values["cxx"] : "g++";
             std::string flags = config.key_values.count("cxxflags") ? config.key_values["cxxflags"] : "-std=c++20";
-            std::string includes_raw = config.key_values.count("include_dirs") ? config.key_values["include_dirs"] : "";
+            std::string includes_raw = config.key_values.count("include_dirs") ? config.key_values["include_dirs"] : "include";
             std::string libs = config.key_values.count("libs") ? config.key_values["libs"] : "";
             std::string src_dir_str = config.key_values.count("source_dir") ? config.key_values["source_dir"] : "src";
             std::string output_binary = config.key_values.count("output_binary") ? config.key_values["output_binary"] : "build\\app.exe";
@@ -407,28 +387,7 @@ namespace tig_pkg::core
         static void list_recipes();
         static void search_recipes(const std::string& query);
         static void show_recipe(const std::string& package_name);
-    private:
-        static void ensure_root();
     };
-
-    void Engine::ensure_root()
-    {
-        BOOL is_admin = FALSE;
-        PSID admin_group = NULL;
-        SID_IDENTIFIER_AUTHORITY nt_authority = SECURITY_NT_AUTHORITY;
-
-        if (AllocateAndInitializeSid(&nt_authority, 2, SECURITY_BUILTIN_DOMAIN_RID,
-                                     DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &admin_group))
-        {
-            CheckTokenMembership(NULL, admin_group, &is_admin);
-            FreeSid(admin_group);
-        }
-
-        if (!is_admin)
-        {
-            throw std::runtime_error("Error: Administrative privileges are required for this operation.");
-        }
-    }
 
     void Engine::init_project()
     {
@@ -470,13 +429,12 @@ namespace tig_pkg::core
 
     void Engine::install_package(const std::string& package_name)
     {
-        ensure_root();
-        
         std::string script_content = tig_pkg::utils::Network::fetch_recipe(package_name, "install.bat");
         
-        const char* temp_env = std::getenv("TEMP");
-        std::filesystem::path staging_dir = temp_env ? temp_env : "C:\\Windows\\Temp";
-        staging_dir /= "tig-pkg_staging";
+        std::filesystem::path local_include = "include";
+        std::filesystem::create_directories(local_include);
+
+        std::filesystem::path staging_dir = ".tig-pkg\\staging";
         std::filesystem::create_directories(staging_dir);
         std::filesystem::path script_path = staging_dir / (package_name + "_install.bat");
         
@@ -486,6 +444,7 @@ namespace tig_pkg::core
             throw std::runtime_error("Error: Storage engine context generation failed.");
         }
 
+        out_file << "set TARGET_INCLUDE_DIR=" << std::filesystem::absolute(local_include).string() << "\n";
         out_file << script_content;
         out_file.close();
 
@@ -498,12 +457,12 @@ namespace tig_pkg::core
         {
             throw std::runtime_error("Error: Directive execution sequence returned an anomalous state.");
         }
+
+        tig_pkg::utils::ManifestManager::record_path(package_name, (local_include / package_name).string());
     }
 
     void Engine::remove_package(const std::string& package_name)
     {
-        ensure_root();
-        
         std::string script_content;
         bool has_remote_recipe = true;
 
@@ -518,9 +477,7 @@ namespace tig_pkg::core
 
         if (has_remote_recipe)
         {
-            const char* temp_env = std::getenv("TEMP");
-            std::filesystem::path staging_dir = temp_env ? temp_env : "C:\\Windows\\Temp";
-            staging_dir /= "tig-pkg_staging";
+            std::filesystem::path staging_dir = ".tig-pkg\\staging";
             std::filesystem::create_directories(staging_dir);
             std::filesystem::path script_path = staging_dir / (package_name + "_remove.bat");
 
@@ -530,6 +487,7 @@ namespace tig_pkg::core
                 throw std::runtime_error("Error: Storage engine context generation failed.");
             }
 
+            out_file << "set TARGET_INCLUDE_DIR=" << std::filesystem::absolute("include").string() << "\n";
             out_file << script_content;
             out_file.close();
 
@@ -563,12 +521,9 @@ namespace tig_pkg::core
         }
 
         std::vector<std::filesystem::path> target_locations = {
-            std::filesystem::path("C:\\Program Files") / package_name,
-            std::filesystem::path("C:\\Program Files (x86)") / package_name,
-            std::filesystem::path("C:\\MSYS2\\mingw64\\bin") / (package_name + ".exe"),
-            std::filesystem::path("C:\\MSYS2\\mingw64\\include") / package_name,
-            std::filesystem::path("C:\\MSYS2\\mingw64\\include") / (package_name + ".h"),
-            std::filesystem::path("C:\\MSYS2\\mingw64\\lib") / ("lib" + package_name + ".a")
+            std::filesystem::path("include") / package_name,
+            std::filesystem::path("include") / (package_name + ".h"),
+            std::filesystem::path("include") / (package_name + ".hpp")
         };
 
         bool removed_any = false;
@@ -586,18 +541,13 @@ namespace tig_pkg::core
 
         if (!removed_any)
         {
-            throw std::runtime_error("Error: No removal recipe found and target binary or library does not exist in system directories.");
+            throw std::runtime_error("Error: Target binary or header does not exist in local include directory.");
         }
     }
 
     void Engine::update_system()
     {
-        ensure_root();
-        std::cout << "Synchronizing arc recipe manifest cache...\n";
-        const char* programdata = std::getenv("PROGRAMDATA");
-        std::filesystem::path conf_path = programdata ? programdata : "C:\\ProgramData";
-        conf_path /= "tig-pkg\\tig-pkg.conf";
-        ConfxData config = ConfxParser::parse(conf_path.string());
+        std::cout << "Synchronizing local arc recipe manifest cache...\n";
     }
 
     void Engine::list_recipes()
@@ -663,16 +613,16 @@ namespace tig_pkg::core
 void print_version()
 {
     std::cout << "\n";
-    std::cout << R"(▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄    ▄▄▄            ▄▄▄▄▄▄▄▄▄
- ▓███▓    ███  ████▒        ████▒   ▀█▄  ███ ░░░░ ██▌ ████▒    
+    std::cout << R"(▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄    ▄▄▄             ▄▄▄▄▄▄▄▄▄
+ ▓███▓    ███  ████▒        ████▒    ▀█▄  ███ ░░░░ ██▌ ████▒    
  ░ ▒███▒ ░  ███  ███▓░ ░░░░   ███▓░ ░   ██ ███ ░░░░ ██▌ ███▓░ ░░░░
  ░ ░▓██░ ░  ▓██  ▓██▒ ▄▄▄▄▄▄ ▓██▒ ░░   ██ ▓██ ░░░  ██▌ ▓██▒ ▄▄▄▄▄▄
- ░  ▒▓█  ░  ▒▓█  ▒▓█ ░    ▒░ ▒▓█░   ▄█▀  ▒▓█    ▄██▀  ▒▓█ ░    ▒░
+ ░  ▒▓█  ░  ▒▓█  ▒▓█ ░    ▒░ ▒▓█░    ▄█▀  ▒▓█    ▄██▀  ▒▓█ ░    ▒░
  ░░ ░▒▓ ░░  ░▒▓  ░▒▓ ░░░░ ▓▒ ░▒▓ ▀▀▀▀ ░░ ░▒▓ ▀▀▀██▄   ░▒▓ ░░░░ ▓▒
  ░░ █░▒ ░░  █░▒  █░▒ ░░░░ █▓ █░▒ ░░░░░░░ █░▒ ░░  ▀██  █░▒ ░░░░ █▓
  ░░ ░█░ ░░  ░█░  ░█░ ░░░░ ██ ░█░ ░░░░░░░ ░█░ ░░░░ █▓  ░█░ ░░░░ ██
  ░░ ▒░█ ░░  ▒░█  ▒░█      ▄██ ▒░█ ░░░░░░░ ▒░█ ░░░░ ▓▒  ▒░█      ▄██
-  ▀▀▀    ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀          ▀▀▀      ▒░    ▀▀▀▀▀▀▀▀▀▀)" 
+  ▀▀▀     ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀          ▀▀▀      ▒░    ▀▀▀▀▀▀▀▀▀▀)" 
               << "\n\n";
     std::cout << "tig-pkg Package Manager — Version 0.4.4-ALPHA\n";
     std::cout << "Engine: Dawn Package System v1.2.4-LTS\n";
@@ -684,18 +634,18 @@ void print_help()
 {
     std::cout << "Usage: tig-pkg [options] command\n\n"
               << "Most used commands:\n"
-              << "  init             - Scan system headers and generate local project configuration (.tig-pkg/include.confx)\n"
-              << "  build            - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
-              << "  sync             - Synchronize workspace dependencies with local cache and arc registry\n"
-              << "  list             - List available recipes in the arc registry\n"
-              << "  search           - Search through arc recipe names and descriptions\n"
-              << "  show             - Display detailed information about a specific recipe\n"
-              << "  install          - Fetch a recipe from arc and execute custom install logic\n"
-              << "  remove           - Remove a package natively from the system\n"
-              << "  update           - Sync local package lists and arc recipe cache\n\n"
+              << "  init              - Scan system headers and generate local project configuration (.tig-pkg/include.confx)\n"
+              << "  build             - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
+              << "  sync              - Synchronize workspace dependencies with local cache and arc registry\n"
+              << "  list              - List available recipes in the arc registry\n"
+              << "  search            - Search through arc recipe names and descriptions\n"
+              << "  show              - Display detailed information about a specific recipe\n"
+              << "  install           - Fetch a recipe from arc and execute custom install logic\n"
+              << "  remove            - Remove a package natively from local workspace\n"
+              << "  update            - Sync local package lists and arc recipe cache\n\n"
               << "Options:\n"
-              << "  -v, --version    - Display version manager information\n"
-              << "  -h, --help       - Display the help menu\n";
+              << "  -v, --version     - Display version manager information\n"
+              << "  -h, --help        - Display the help menu\n";
 }
 
 int main(int argc, char* argv[])
