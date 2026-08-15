@@ -80,3 +80,4 @@ Under the GPLv3 mandate, this ecosystem operates under strict protective guideli
 * **Patent Protection:** The license includes an express grant of patent rights from contributors, preventing corporate entities from asserting patent litigation against the users or developers of this project.
 * **No Proprietary Abstraction:** Proprietary backends, closed software stores, or containerized packaging systems cannot encapsulate or link with this utility without making their own integration mechanisms fully open-source.
 
+> hypernova-developer
