@@ -181,7 +181,7 @@ namespace tig-pkg::utils
         }
 
         std::string read_buffer;
-        std::string url = "https://raw.githubusercontent.com/tig-pkg-pm/Signature/main/catalog.list";
+        std::string url = "https://raw.githubusercontent.com/SolarPathPlus/Signature/main/catalog.list";
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
