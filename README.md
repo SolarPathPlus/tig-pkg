@@ -67,6 +67,18 @@ tig-pkg dramatically optimizes this workflow by focusing on lightweight, transpa
 
 ---
 
+## Embedded Toolchains and ESP32 Ecosystem Directives
+
+The `tig-pkg` engine and Arc recipe network are specifically optimized to streamline hardware-bound development workflows for embedded systems, microcontrollers, and IoT platforms, with a primary focus on the **ESP32** hardware family. 
+
+Managing embedded dependencies, cross-compilation toolchains, and hardware-specific wrappers typically forces developers into heavy vendor IDEs, complex Espressif IDF setups, or rigid build configurations. `tig-pkg` breaks these constraints by providing bare-metal dependency resolution for embedded projects:
+
+* **ESP-IDF & Bare-Metal C/C++ Wrapper Management:** `tig-pkg` manages lightweight hardware abstraction layers (HAL), custom drivers, and ESP32-tailored C/C++ wrappers directly. It allows developers to include targeted hardware directives without dragging heavy vendor SDK overhead into lightweight projects.
+* **Target-Aware Header & Library Resolution:** Recipes defined within Arc specify explicit architectural targets (e.g., Xtensa LX6/LX7 or RISC-V architectures for ESP32 variants). `tig-pkg` resolves include paths and static hardware libraries with zero runtime impact, keeping firmware footprints minimal.
+* **Automated Peripheral & Middleware Injection:** Whether linking custom communication protocol wrappers (SPI, I2C, UART), sensor abstraction libraries, or hardware-accelerated cryptographic primitives for ESP32, `tig-pkg` automatically injects verified header locations into project configs (`.confx`).
+
+---
+
 ## Licensing and Ownership
 
 The tig-pkg Project is an open-source initiative dedicated to the software development community. The core package manager framework and its accompanying ecosystem architectures are designed, maintained, and actively developed by **hypernova-developer**. In accordance with the principles of software freedom and copyleft protection, the entire framework is officially distributed under the terms of the **GNU General Public License v3.0 (GPLv3)**. For complete legal provisions, conditions, and permissions, please refer directly to the `LICENSE` file located within the root directory of this repository.
