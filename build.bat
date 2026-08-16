@@ -5,7 +5,7 @@ set "SCRIPT_DIR=%~dp0"
 set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 
 set "OUTPUT=%SCRIPT_DIR%\tig-pkg.exe"
-set "SOURCE=%SCRIPT_DIR%\src\windows\main.cpp"
+set "SOURCE=%SCRIPT_DIR%\src\main.cpp"
 
 if not defined CXX set "CXX=g++"
 set "CXXFLAGS=-std=c++20 -O3 -march=native -Wall -Wextra"
