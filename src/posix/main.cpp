@@ -573,7 +573,7 @@ void print_version()
     std::cout << "tig-pkg Package Manager — Version 0.4.4-ALPHA\n";
     std::cout << "Engine: hypecc Package Manager v1.0.0-LTS\n";
     std::cout << "Licensing: GNU GPL v3.0\n";
-    std::cout << "tig-pkg — Because C/C++ package management should actually be worth the hype.\n";
+    std::cout << "tig-pkg — Keep your vision wide, be beyond the Earth.\n";
 }
 
 void print_help()
