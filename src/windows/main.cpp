@@ -155,7 +155,7 @@ namespace tig_pkg::utils
 
         std::string read_buffer;
         std::string url = "https://raw.githubusercontent.com/SolarPathPlus/arc/main/recipes/" 
-                          + package_name + "/" + script_name;
+                        + package_name + "/" + script_name;
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -225,12 +225,7 @@ namespace tig_pkg::utils
 
             ConfxData data;
             data.key_values["name"] = std::filesystem::current_path().filename().string();
-            data.key_values["cxx"] = "g++";
-            data.key_values["cxxflags"] = "-std=c++20 -O3 -Wall -Wextra";
             data.key_values["include_dirs"] = detected_includes;
-            data.key_values["libs"] = "-lws2_32";
-            data.key_values["source_dir"] = "src";
-            data.key_values["output_binary"] = "build\\app.exe";
             data.key_values["requires"] = "";
 
             ConfxParser::write(config_path.string(), data);
@@ -294,92 +289,10 @@ namespace tig_pkg::core
         }
     };
 
-    class Builder
-    {
-    public:
-        static void build()
-        {
-            std::filesystem::path config_path = ".tig-pkg/include.confx";
-            if (!std::filesystem::exists(config_path))
-            {
-                throw std::runtime_error("Error: Missing project configuration file .tig-pkg/include.confx. Execute 'tig-pkg init' first.");
-            }
-
-            ConfxData config = ConfxParser::parse(config_path.string());
-
-            std::string compiler = config.key_values.count("cxx") ? config.key_values["cxx"] : "g++";
-            std::string flags = config.key_values.count("cxxflags") ? config.key_values["cxxflags"] : "-std=c++20";
-            std::string includes_raw = config.key_values.count("include_dirs") ? config.key_values["include_dirs"] : "include";
-            std::string libs = config.key_values.count("libs") ? config.key_values["libs"] : "";
-            std::string src_dir_str = config.key_values.count("source_dir") ? config.key_values["source_dir"] : "src";
-            std::string output_binary = config.key_values.count("output_binary") ? config.key_values["output_binary"] : "build\\app.exe";
-
-            std::string include_flags;
-            if (!includes_raw.empty())
-            {
-                std::stringstream ss(includes_raw);
-                std::string path;
-                while (std::getline(ss, path, ';'))
-                {
-                    if (!path.empty())
-                    {
-                        include_flags += " -I\"" + path + "\"";
-                    }
-                }
-            }
-
-            std::filesystem::path src_dir(src_dir_str);
-            std::vector<std::string> sources;
-
-            if (std::filesystem::exists(src_dir) && std::filesystem::is_directory(src_dir))
-            {
-                for (const auto& entry : std::filesystem::recursive_directory_iterator(src_dir))
-                {
-                    if (entry.is_regular_file() && entry.path().extension() == ".cpp")
-                    {
-                        sources.push_back(entry.path().string());
-                    }
-                }
-            }
-            else if (std::filesystem::exists("main.cpp"))
-            {
-                sources.push_back("main.cpp");
-            }
-
-            if (sources.empty())
-            {
-                throw std::runtime_error("Error: No C++ source files identified in target directory.");
-            }
-
-            std::filesystem::path out_path(output_binary);
-            if (out_path.has_parent_path())
-            {
-                std::filesystem::create_directories(out_path.parent_path());
-            }
-
-            std::string command = compiler + " " + flags + include_flags;
-            for (const auto& src : sources)
-            {
-                command += " \"" + src + "\"";
-            }
-            command += " " + libs + " -o \"" + output_binary + "\"";
-
-            std::cout << "[tig-pkg] Orchestrating build pipeline:\n" << command << "\n";
-            int status = std::system(command.c_str());
-            if (status != 0)
-            {
-                throw std::runtime_error("Error: Compilation directive returned a non-zero exit status.");
-            }
-
-            std::cout << "[tig-pkg] Build sequence executed successfully. Artifact location: " << output_binary << "\n";
-        }
-    };
-
     class Engine
     {
     public:
         static void init_project();
-        static void build_project();
         static void sync_project();
         static void install_package(const std::string& package_name);
         static void remove_package(const std::string& package_name);
@@ -392,11 +305,6 @@ namespace tig_pkg::core
     void Engine::init_project()
     {
         tig_pkg::utils::SystemScanner::generate_project_config();
-    }
-
-    void Engine::build_project()
-    {
-        tig_pkg::core::Builder::build();
     }
 
     void Engine::sync_project()
@@ -613,18 +521,18 @@ namespace tig_pkg::core
 void print_version()
 {
     std::cout << "\n";
-    std::cout << R"(▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄    ▄▄▄              ▄▄▄▄▄▄▄▄▄
- ▓███▓    ███  ████▒        ████▒    ▀█▄  ███ ░░░░ ██▌ ████▒    
- ░ ▒███▒ ░  ███  ███▓░ ░░░░   ███▓░ ░   ██ ███ ░░░░ ██▌ ███▓░ ░░░░
- ░ ░▓██░ ░  ▓██  ▓██▒ ▄▄▄▄▄▄ ▓██▒ ░░   ██ ▓██ ░░░  ██▌ ▓██▒ ▄▄▄▄▄▄
- ░  ▒▓█  ░  ▒▓█  ▒▓█ ░    ▒░ ▒▓█░    ▄█▀  ▒▓█    ▄██▀  ▒▓█ ░    ▒░
- ░░ ░▒▓ ░░  ░▒▓  ░▒▓ ░░░░ ▓▒ ░▒▓ ▀▀▀▀ ░░ ░▒▓ ▀▀▀██▄   ░▒▓ ░░░░ ▓▒
- ░░ █░▒ ░░  █░▒  █░▒ ░░░░ █▓ █░▒ ░░░░░░░ █░▒ ░░  ▀██  █░▒ ░░░░ █▓
- ░░ ░█░ ░░  ░█░  ░█░ ░░░░ ██ ░█░ ░░░░░░░ ░█░ ░░░░ █▓  ░█░ ░░░░ ██
- ░░ ▒░█ ░░  ▒░█  ▒░█      ▄██ ▒░█ ░░░░░░░ ▒░█ ░░░░ ▓▒  ▒░█      ▄██
-  ▀▀▀      ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀          ▀▀▀      ▒░    ▀▀▀▀▀▀▀▀▀▀)" 
+    std::cout << R"(▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄    ▄▄▄         ▄▄▄▄▄▄▄▄▄
+ ███▓   ███  ████▒         ████▒    ▀█▄  ███ ░░░░ ██▌ ████▒    
+░ ▒███▒ ░  ███  ███▓░ ░░░░    ███▓░ ░    ██ ███ ░░░░ ██▌ ███▓░ ░░░░
+░ ░▓██░ ░  ▓██  ▓██▒ ▄▄▄▄▄▄ ▓██▒ ░░    ██ ▓██ ░░░  ██▌ ▓██▒ ▄▄▄▄▄▄
+░   ▒▓█  ░  ▒▓█  ▒▓█ ░    ▒░ ▒▓█░    ▄█▀  ▒▓█    ▄██▀  ▒▓█ ░    ▒░
+░░ ░▒▓ ░░  ░▒▓  ░▒▓ ░░░░ ▓▒ ░▒▓ ▀▀▀▀ ░░ ░▒▓ ▀▀▀██▄   ░▒▓ ░░░░ ▓▒
+░░ █░▒ ░░  █░▒  █░▒ ░░░░ █▓ █░▒ ░░░░░░░ █░▒ ░░  ▀██  █░▒ ░░░░ █▓
+░░ ░█░ ░░  ░█░  ░█░ ░░░░ ██ ░█░ ░░░░░░░ ░█░ ░░░░ █▓  ░█░ ░░░░ ██
+░░ ▒░█ ░░  ▒░█  ▒░█      ▄██ ▒░█ ░░░░░░░ ▒░█ ░░░░ ▓▒  ▒░█      ▄██
+ ▀▀▀       ▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀ ▀▀▀         ▀▀▀      ▒░    ▀▀▀▀▀▀▀▀▀▀)" 
               << "\n\n";
-    std::cout << "tig-pkg Package Manager — Version 0.4.4-ALPHA\n";
+    std::cout << "tig-pkg Package Manager — Version 0.5.4-ALPHA\n";
     std::cout << "Engine: hypecc Package Manager v.1.0.0-LTS\n";
     std::cout << "Licensing: GNU GPL v3.0\n";
     std::cout << "tig-pkg — Keep your vision wide, be beyond the Earth.\n";
@@ -635,7 +543,6 @@ void print_help()
     std::cout << "Usage: tig-pkg [options] command\n\n"
               << "Most used commands:\n"
               << "  init              - Scan system headers and generate local project configuration (.tig-pkg/include.confx)\n"
-              << "  build             - Orchestrate direct bare-metal compilation pipeline without CMake or Makefile\n"
               << "  sync              - Synchronize workspace dependencies with local cache and arc registry\n"
               << "  list              - List available recipes in the arc registry\n"
               << "  search            - Search through arc recipe names and descriptions\n"
@@ -671,10 +578,6 @@ int main(int argc, char* argv[])
         else if (command == "init")
         {
             tig_pkg::core::Engine::init_project();
-        }
-        else if (command == "build")
-        {
-            tig_pkg::core::Engine::build_project();
         }
         else if (command == "sync")
         {
